@@ -1,37 +1,32 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Murmur } from './murmur.entity';
-import { Follow } from './follow.entity';
-import { Like } from './like.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 
-@Entity('users')
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id!: number;
+  id: number;
 
-  @Column({ length: 255 })
-  name!: string;
+  @Column({ length: 50, unique: true })
+  name: string;
 
-  @Column({ length: 255, unique: true })
-  email!: string;
+  @Column({ select: false })
+  password: string;
 
-  @Column({ length: 255 })
-  password!: string;
+  @Column({ default: 0 })
+  followCount: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-  createdAt!: Date;
+  @Column({ default: 0 })
+  followedCount: number;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
-  updatedAt!: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @OneToMany(() => Murmur, murmur => murmur.user)
-  murmurs!: Murmur[];
-
-  @OneToMany(() => Follow, follow => follow.follower)
-  following!: Follow[];
-
-  @OneToMany(() => Follow, follow => follow.following)
-  followers!: Follow[];
-
-  @OneToMany(() => Like, like => like.user)
-  likes!: Like[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

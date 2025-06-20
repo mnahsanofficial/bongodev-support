@@ -4,8 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './entities/user.entity';
 import { Murmur } from './entities/murmur.entity';
-import { Follow } from './entities/follow.entity';
 import { Like } from './entities/like.entity';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { MurmurModule } from './murmur/murmur.module';
 
 @Module({
   imports: [
@@ -16,10 +18,13 @@ import { Like } from './entities/like.entity';
       username: 'docker',
       password: 'docker',
        database: 'murmur_app', // Updated database name
-      entities: [User, Murmur, Follow, Like], // All entities
+      entities: [User, Murmur, Like], 
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Murmur, Follow, Like]),
+    // TypeOrmModule.forFeature([User, Murmur, Like]),
+    AuthModule,
+    UserModule,
+    MurmurModule,
   ],
   controllers: [AppController],
   providers: [AppService],

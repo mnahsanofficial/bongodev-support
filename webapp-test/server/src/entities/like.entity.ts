@@ -1,27 +1,32 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn, Unique, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  Index,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Murmur } from './murmur.entity';
 
-@Entity('likes')
-@Unique(['user_id', 'murmur_id'])
+@Entity()
+@Index(['userId', 'murmurId'], { unique: true })
 export class Like {
   @PrimaryGeneratedColumn()
-  id!: number;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-  createdAt!: Date;
-
-  @ManyToOne(() => User, user => user.likes, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user!: User;
+  id: number;
 
   @Column()
-  user_id!: number;
-
-  @ManyToOne(() => Murmur, murmur => murmur.likes, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'murmur_id' })
-  murmur!: Murmur;
+  userId: number;
 
   @Column()
-  murmur_id!: number;
+  murmurId: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @ManyToOne(() => User)
+  user: User;
+
+  @ManyToOne(() => Murmur)
+  murmur: Murmur;
 }

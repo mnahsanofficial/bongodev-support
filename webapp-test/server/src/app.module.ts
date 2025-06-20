@@ -3,6 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './entities/user.entity';
+import { Murmur } from './entities/murmur.entity';
+import { Follow } from './entities/follow.entity';
+import { Like } from './entities/like.entity';
 
 @Module({
   imports: [
@@ -12,11 +15,11 @@ import { User } from './entities/user.entity';
       port: 3306,
       username: 'docker',
       password: 'docker',
-      database: 'test',
-      entities: [User],
+       database: 'murmur_app', // Updated database name
+      entities: [User, Murmur, Follow, Like], // All entities
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Murmur, Follow, Like]),
   ],
   controllers: [AppController],
   providers: [AppService],

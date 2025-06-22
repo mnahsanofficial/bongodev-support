@@ -8,6 +8,10 @@ export declare class MurmurController {
         murmurs: import("../entities/murmur.entity").Murmur[];
         total: number;
     }>;
+    getTimeline(req: any, page: number, limit: number): Promise<{
+        murmurs: import("../entities/murmur.entity").Murmur[];
+        total: number;
+    }>;
     getMurmurById(id: number): Promise<import("../entities/murmur.entity").Murmur>;
     deleteMurmur(id: number, req: any): Promise<void>;
     likeMurmur(murmurId: number, req: any): Promise<import("../entities/like.entity").Like>;

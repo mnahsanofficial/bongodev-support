@@ -18,10 +18,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("../entities/user.entity");
 const murmur_entity_1 = require("../entities/murmur.entity");
+const follow_entity_1 = require("../entities/follow.entity");
 let UserService = class UserService {
-    constructor(userRepository, murmurRepository) {
+    constructor(userRepository, murmurRepository, followRepository) {
         this.userRepository = userRepository;
         this.murmurRepository = murmurRepository;
+        this.followRepository = followRepository;
     }
     async getUserById(id) {
         const user = await this.userRepository.findOne({
@@ -42,13 +44,53 @@ let UserService = class UserService {
         });
         return { murmurs, total };
     }
+    async followUser(followerId, followingId) {
+        if (followerId === followingId) {
+            throw new common_1.BadRequestException('You cannot follow yourself.');
+        }
+        const userToFollow = await this.userRepository.findOneBy({ id: followingId });
+        if (!userToFollow) {
+            throw new common_1.NotFoundException(`User with ID ${followingId} not found.`);
+        }
+        const existingFollow = await this.followRepository.findOneBy({
+            follower_id: followerId,
+            following_id: followingId,
+        });
+        if (existingFollow) {
+            throw new common_1.ConflictException('You are already following this user.');
+        }
+        await this.userRepository.increment({ id: followingId }, 'followCount', 1);
+        await this.userRepository.increment({ id: followerId }, 'followedCount', 1);
+        const follow = this.followRepository.create({
+            follower_id: followerId,
+            following_id: followingId,
+        });
+        return this.followRepository.save(follow);
+    }
+    async unfollowUser(followerId, followingId) {
+        const userToUnfollow = await this.userRepository.findOneBy({ id: followingId });
+        if (!userToUnfollow) {
+            throw new common_1.NotFoundException(`User with ID ${followingId} not found.`);
+        }
+        const result = await this.followRepository.delete({
+            follower_id: followerId,
+            following_id: followingId,
+        });
+        if (result.affected === 0) {
+            throw new common_1.NotFoundException('You are not following this user.');
+        }
+        await this.userRepository.decrement({ id: followingId }, 'followCount', 1);
+        await this.userRepository.decrement({ id: followerId }, 'followedCount', 1);
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(1, (0, typeorm_1.InjectRepository)(murmur_entity_1.Murmur)),
+    __param(2, (0, typeorm_1.InjectRepository)(follow_entity_1.Follow)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], UserService);
 //# sourceMappingURL=user.service.js.map

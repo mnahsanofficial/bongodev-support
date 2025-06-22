@@ -35,6 +35,17 @@ export class MurmurController {
     return this.murmurService.getMurmurs(page, limit);
   }
 
+   @UseGuards(JwtAuthGuard)
+  @Get('me/timeline')
+  async getTimeline(
+    @Req() req,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    const userId = req.user.userId;
+    return this.murmurService.getTimeline(userId, page, limit);
+  }
+
   @Get('murmurs/:id')
   async getMurmurById(@Param('id', ParseIntPipe) id: number) {
     return this.murmurService.getMurmurById(id);

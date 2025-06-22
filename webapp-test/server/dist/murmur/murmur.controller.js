@@ -28,6 +28,10 @@ let MurmurController = class MurmurController {
     async getMurmurs(page, limit) {
         return this.murmurService.getMurmurs(page, limit);
     }
+    async getTimeline(req, page, limit) {
+        const userId = req.user.userId;
+        return this.murmurService.getTimeline(userId, page, limit);
+    }
     async getMurmurById(id) {
         return this.murmurService.getMurmurById(id);
     }
@@ -62,6 +66,16 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number]),
     __metadata("design:returntype", Promise)
 ], MurmurController.prototype, "getMurmurs", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('me/timeline'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(10), common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Number]),
+    __metadata("design:returntype", Promise)
+], MurmurController.prototype, "getTimeline", null);
 __decorate([
     (0, common_1.Get)('murmurs/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

@@ -5,8 +5,14 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  Post,
+  Delete,
+  HttpCode,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // Import JwtAuthGuard
 
 @Controller('api/users')
 export class UserController {
@@ -24,5 +30,20 @@ export class UserController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     return this.userService.getMurmursByUserId(userId, page, limit);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/follow')
+  async followUser(@Param('id', ParseIntPipe) followingId: number, @Req() req) {
+    const followerId = req.user.userId;
+    return this.userService.followUser(followerId, followingId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/follow')
+  @HttpCode(204)
+  async unfollowUser(@Param('id', ParseIntPipe) followingId: number, @Req() req) {
+    const followerId = req.user.userId;
+    return this.userService.unfollowUser(followerId, followingId);
   }
 }

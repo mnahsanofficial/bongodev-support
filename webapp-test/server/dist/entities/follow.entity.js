@@ -20,29 +20,32 @@ __decorate([
     __metadata("design:type", Number)
 ], Follow.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: 'created_at', type: 'timestamp' }),
-    __metadata("design:type", Date)
-], Follow.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, user => user.following, { nullable: false, onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'follower_id' }),
-    __metadata("design:type", user_entity_1.User)
-], Follow.prototype, "follower", void 0);
-__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Follow.prototype, "follower_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, user => user.followers, { nullable: false, onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'following_id' }),
-    __metadata("design:type", user_entity_1.User)
-], Follow.prototype, "following", void 0);
-__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Follow.prototype, "following_id", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
+], Follow.prototype, "created_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }),
+    __metadata("design:type", Date)
+], Follow.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.followers),
+    (0, typeorm_1.JoinColumn)({ name: 'follower_id' }),
+    __metadata("design:type", user_entity_1.User)
+], Follow.prototype, "follower", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.following),
+    (0, typeorm_1.JoinColumn)({ name: 'following_id' }),
+    __metadata("design:type", user_entity_1.User)
+], Follow.prototype, "following", void 0);
 exports.Follow = Follow = __decorate([
-    (0, typeorm_1.Entity)('follows'),
-    (0, typeorm_1.Unique)(['follower_id', 'following_id'])
+    (0, typeorm_1.Entity)('follows')
 ], Follow);
 //# sourceMappingURL=follow.entity.js.map

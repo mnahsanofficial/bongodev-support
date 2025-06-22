@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -24,6 +25,14 @@ let UserController = class UserController {
     }
     async getMurmursByUserId(userId, page, limit) {
         return this.userService.getMurmursByUserId(userId, page, limit);
+    }
+    async followUser(followingId, req) {
+        const followerId = req.user.userId;
+        return this.userService.followUser(followerId, followingId);
+    }
+    async unfollowUser(followingId, req) {
+        const followerId = req.user.userId;
+        return this.userService.unfollowUser(followerId, followingId);
     }
 };
 exports.UserController = UserController;
@@ -43,6 +52,25 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getMurmursByUserId", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)(':id/follow'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "followUser", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Delete)(':id/follow'),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "unfollowUser", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('api/users'),
     __metadata("design:paramtypes", [user_service_1.UserService])

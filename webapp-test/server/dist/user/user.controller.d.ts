@@ -7,4 +7,6 @@ export declare class UserController {
         murmurs: import("../entities/murmur.entity").Murmur[];
         total: number;
     }>;
+    followUser(followingId: number, req: any): Promise<import("../entities/follow.entity").Follow>;
+    unfollowUser(followingId: number, req: any): Promise<void>;
 }

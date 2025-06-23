@@ -2,81 +2,92 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getMyTimeline, postMurmur, likeMurmur, unlikeMurmur } from '../services/api';
 import MurmurList from '../components/MurmurList';
 import PostMurmurForm from '../components/PostMurmurForm';
-import { Murmur } from '../components/MurmurCard'; // Assuming Murmur type is exported from MurmurCard
-import { useAuth } from '../contexts/AuthContext'; // To ensure user is authenticated
+import { Murmur } from '../components/MurmurCard';
+import { useAuth } from '../contexts/AuthContext';
+import { Paginator, PaginatorPageChangeEvent } from 'primereact/paginator';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import { Message } from 'primereact/message';
+import { Card } from 'primereact/card';
 
 const ITEMS_PER_PAGE = 10;
 
 const TimelinePage: React.FC = () => {
   const [murmurs, setMurmurs] = useState<Murmur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPosting, setIsPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [postError, setPostError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  
+  // Paginator state: first is the index of the first item
+  const [first, setFirst] = useState(0);
+  // Current page (1-indexed) for data fetching
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+
   const [likedMurmurs, setLikedMurmurs] = useState<Set<number>>(new Set());
   const { isAuthenticated } = useAuth();
 
-  const fetchTimeline = useCallback(async (currentPage: number) => {
-    if (!isAuthenticated) return; // Don't fetch if not authenticated
+  const fetchTimeline = useCallback(async (pageToFetch: number) => {
+    if (!isAuthenticated) return;
 
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getMyTimeline(currentPage, ITEMS_PER_PAGE);
-      // Adjust based on actual API response structure for murmurs and total
-      // Assuming response.data is { murmurs: Murmur[], total: number } or { items: Murmur[], totalPages: number }
-      // For this example, let's assume: response.data = { murmurs: Murmur[], totalPages: number }
-      // If your API returns total items and items per page, calculate totalPages: Math.ceil(totalItems / itemsPerPage)
-      
-      // The backend returns: { murmurs: Murmur[]; total: number }
-      // The `total` is total number of murmurs, not total pages.
+      const response = await getMyTimeline(pageToFetch, ITEMS_PER_PAGE);
       const fetchedMurmurs = response.data.murmurs || [];
       const totalItems = response.data.total || 0;
       
       setMurmurs(fetchedMurmurs);
-      setTotalPages(Math.ceil(totalItems / ITEMS_PER_PAGE));
+      setTotalRecords(totalItems);
+      // Ensure 'first' is updated if current page is beyond new totalRecords
+      if ((pageToFetch - 1) * ITEMS_PER_PAGE >= totalItems && totalItems > 0) {
+        const newLastPage = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        setCurrentPage(newLastPage);
+        setFirst((newLastPage - 1) * ITEMS_PER_PAGE);
+      }
 
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch timeline.');
-      setMurmurs([]); // Clear murmurs on error
+      setMurmurs([]);
+      setTotalRecords(0);
     } finally {
       setIsLoading(false);
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchTimeline(page);
-  }, [fetchTimeline, page]);
+    fetchTimeline(currentPage);
+  }, [fetchTimeline, currentPage]);
 
   const handlePostMurmur = async (text: string) => {
     setPostError(null);
+    setIsPosting(true);
     try {
       await postMurmur(text);
       // Refresh timeline to show the new murmur
-      // Ideally, the API would return the new murmur and we could prepend it
-      // For simplicity, refetching page 1 or current page if on page 1
-      if (page === 1) {
-        fetchTimeline(1);
+      if (currentPage === 1) {
+        fetchTimeline(1); // Refetch current page if on page 1
       } else {
-        setPage(1); // Go to first page to see new murmur
+        setCurrentPage(1); // Go to first page
+        setFirst(0);       // Reset paginator to first page
       }
     } catch (err: any) {
       setPostError(err.response?.data?.message || 'Failed to post murmur.');
-      throw err; // Re-throw to let PostMurmurForm handle its own error state if needed
+      throw err; 
+    } finally {
+      setIsPosting(false);
     }
   };
 
   const handleLikeMurmur = async (murmurId: number) => {
+    // ... (optimistic update logic remains the same)
     const isLiked = likedMurmurs.has(murmurId);
     const originalMurmurs = [...murmurs];
     const originalLikedMurmurs = new Set(likedMurmurs);
 
-    // Optimistic UI update
     setLikedMurmurs(prev => {
       const newSet = new Set(prev);
-      if (isLiked) newSet.delete(murmurId);
-      else newSet.add(murmurId);
+      if (isLiked) newSet.delete(murmurId); else newSet.add(murmurId);
       return newSet;
     });
     setMurmurs(prevMurmurs => prevMurmurs.map(m => 
@@ -86,43 +97,61 @@ const TimelinePage: React.FC = () => {
     ));
 
     try {
-      if (isLiked) {
-        await unlikeMurmur(murmurId);
-      } else {
-        await likeMurmur(murmurId);
-      }
-      // If API call is successful, local state is already updated.
-      // Optionally, refetch the specific murmur for updated likeCount from server
-      // or trust the optimistic update.
+      if (isLiked) await unlikeMurmur(murmurId); else await likeMurmur(murmurId);
     } catch (err) {
       console.error('Failed to like/unlike murmur:', err);
-      // Revert UI on error
       setMurmurs(originalMurmurs);
       setLikedMurmurs(originalLikedMurmurs);
-      // Optionally, show an error message to the user
+      // Consider showing a toast message for like/unlike errors
     }
   };
 
+  const onPageChange = (event: PaginatorPageChangeEvent) => {
+    setFirst(event.first);
+    setCurrentPage(event.page + 1); // event.page is 0-indexed
+  };
+
+  if (!isAuthenticated && !isLoading) { // Check isLoading to avoid flash of this message
+    return <Message severity="warn" text="Please log in to view your timeline." />;
+  }
+  
   return (
-    <div>
-      <h3>My Timeline</h3>
-      <PostMurmurForm onSubmit={handlePostMurmur} submitError={postError} />
-      <MurmurList
-        murmurs={murmurs}
-        isLoading={isLoading}
-        error={error}
-        onLikeMurmur={handleLikeMurmur}
-        likedMurmurs={likedMurmurs}
-      />
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <button onClick={() => setPage(p => p - 1)} disabled={page <= 1 || isLoading}>
-          Previous
-        </button>
-        <span style={{ margin: '0 10px' }}>Page {page} of {totalPages}</span>
-        <button onClick={() => setPage(p => p + 1)} disabled={page >= totalPages || isLoading}>
-          Next
-        </button>
-      </div>
+    <div className="p-4">
+      <Card title="My Timeline" className="mb-4">
+        <PostMurmurForm onSubmit={handlePostMurmur} submitError={postError} isLoading={isPosting} />
+      </Card>
+
+      {isLoading && !murmurs.length ? ( // Show spinner only if no murmurs are displayed yet
+        <div className="flex justify-content-center p-4">
+          <ProgressSpinner style={{width: '50px', height: '50px'}} strokeWidth="8" />
+        </div>
+      ) : error ? (
+        <Message severity="error" text={error} className="mb-3 w-full" />
+      ) : (
+        <>
+          <MurmurList
+            murmurs={murmurs}
+            // isLoading prop for MurmurList might be redundant if page handles main loading state
+            // error prop for MurmurList might also be redundant
+            onLikeMurmur={handleLikeMurmur}
+            likedMurmurs={likedMurmurs}
+          />
+          {totalRecords > ITEMS_PER_PAGE && (
+            <Paginator
+              first={first}
+              rows={ITEMS_PER_PAGE}
+              totalRecords={totalRecords}
+              onPageChange={onPageChange}
+              className="mt-4"
+              template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+              rowsPerPageOptions={[10, 20, 30]} // Optional: if you want to allow changing items per page
+            />
+          )}
+          {!isLoading && !error && murmurs.length === 0 && (
+             <Message severity="info" text="No murmurs in your timeline yet. Follow some users or post your own!" className="mt-4"/>
+          )}
+        </>
+      )}
     </div>
   );
 };

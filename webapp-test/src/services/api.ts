@@ -25,7 +25,7 @@ export const registerUser = async (userData: any) => {
 
 // Example of a protected route, can be expanded later
 export const getMyProfile = async () => {
-  return apiClient.get('/api/me');
+  return apiClient.get('/api/auth/me');
 };
 
 export const postMurmur = async (text: string) => {

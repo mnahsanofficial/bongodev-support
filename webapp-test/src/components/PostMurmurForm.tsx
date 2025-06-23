@@ -1,45 +1,56 @@
 import React, { useState } from 'react';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Button } from 'primereact/button';
+import { Message } from 'primereact/message';
+import { Card } from 'primereact/card';
 
 interface PostMurmurFormProps {
-  onSubmit: (text: string) => Promise<void>; // Make onSubmit async if it performs API calls
+  onSubmit: (text: string) => Promise<void>;
   submitError?: string | null;
+  isLoading?: boolean; // To disable button during submission
 }
 
-const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError }) => {
+const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, isLoading }) => {
   const [text, setText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!text.trim()) {
-      setError('Murmur text cannot be empty.');
+      setLocalError('Murmur text cannot be empty.');
       return;
     }
-    setError(null); // Clear local error
+    setLocalError(null); // Clear local error
     try {
       await onSubmit(text);
       setText(''); // Clear textarea on successful submission
     } catch (err) {
-      // Error handling can be done in the parent component via onSubmit promise rejection
-      // Or, if submitError prop is used to pass errors from parent:
-      // setError("Failed to post murmur."); // This would be a generic message
+      // Parent component is expected to handle and pass down submitError
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '5px' }}>
-      <h4>Post a new Murmur</h4>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="What's on your mind?"
-        rows={3}
-        style={{ width: '100%', marginBottom: '10px', padding: '8px', boxSizing: 'border-box' }}
-        required
-      />
-      {(error || submitError) && <p style={{ color: 'red' }}>{error || submitError}</p>}
-      <button type="submit">Post Murmur</button>
-    </form>
+    <Card title="Post a new Murmur" className="mb-4">
+      <form onSubmit={handleSubmit}>
+        <div className="p-fluid">
+          <div className="p-field mb-3">
+            <InputTextarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="What's on your mind?"
+              rows={3}
+              className="w-full"
+              autoResize
+              required
+            />
+          </div>
+        </div>
+        {(localError || submitError) && (
+          <Message severity="error" text={localError || submitError || 'An error occurred'} className="mb-3 w-full" />
+        )}
+        <Button type="submit" label="Post Murmur" icon="pi pi-send" disabled={isLoading} className="w-full sm:w-auto" />
+      </form>
+    </Card>
   );
 };
 

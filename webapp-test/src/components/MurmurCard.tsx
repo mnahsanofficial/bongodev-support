@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Card } from 'primereact/card';
+import { Button } from 'primereact/button';
 
 // Define a more specific type for the murmur's user object
 interface MurmurUser {
@@ -17,7 +19,6 @@ export interface Murmur {
   userId: number;
   user: MurmurUser; // Use the MurmurUser interface
   likeCount?: number; // Optional as it might not always be present initially
-  // Potentially add other fields like 'likes' array if needed for isLiked logic
 }
 
 interface MurmurCardProps {
@@ -35,40 +36,63 @@ const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDele
 
   const handleDeleteClick = () => {
     if (onDelete) {
-      // Optional: Add a confirmation dialog here
-      // if (window.confirm('Are you sure you want to delete this murmur?')) {
       onDelete(murmur.id);
-      // }
     }
   };
 
   const formattedTimestamp = new Date(murmur.createdAt).toLocaleString();
 
-  return (
-    <div style={{ border: '1px solid #eee', padding: '15px', marginBottom: '10px', borderRadius: '5px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <p style={{ flexGrow: 1, margin: 0 }}>{murmur.text}</p>
+  const header = (
+    <div className="p-card-header p-3">
+      <div className="flex justify-content-between align-items-start">
+        <span className="font-bold">
+          {murmur.user ? (
+            <Link to={`/users/${murmur.user.id}`} className="no-underline hover:underline text-primary">
+              {murmur.user.name || 'Unknown User'}
+            </Link>
+          ) : (
+            'Unknown User'
+          )}
+        </span>
         {showDeleteButton && onDelete && (
-          <button onClick={handleDeleteClick} style={{ marginLeft: '10px', color: 'red', border: 'none', background: 'transparent', cursor: 'pointer' }}>
-            Delete
-          </button>
+          <Button 
+            icon="pi pi-trash" 
+            className="p-button-text p-button-danger p-button-sm" 
+            onClick={handleDeleteClick} 
+            tooltip="Delete Murmur" 
+            tooltipOptions={{ position: 'top' }}
+          />
         )}
       </div>
-      <small>
-        Posted by: <Link to={`/users/${murmur.user.id}`}>{murmur.user.name || 'Unknown User'}</Link>
-        {' on '}
-        {formattedTimestamp}
-      </small>
-      <div>
-        <span>Likes: {murmur.likeCount !== undefined ? murmur.likeCount : 0}</span>
-        <button onClick={handleLikeClick} style={{ marginLeft: '10px' }}>
-          {isLiked ? 'Unlike' : 'Like'}
-        </button>
+      <div className="text-sm text-gray-600 mt-1">
+        Posted on: {formattedTimestamp}
       </div>
-      <small>
-        <Link to={`/murmurs/${murmur.id}`}>View Details</Link>
-      </small>
     </div>
+  );
+
+  const footer = (
+    <div className="p-card-footer p-3">
+      <div className="flex align-items-center justify-content-between">
+        <Button 
+          label={isLiked ? 'Unlike' : 'Like'} 
+          icon={isLiked ? 'pi pi-thumbs-down' : 'pi pi-thumbs-up'} 
+          className={`p-button-sm ${isLiked ? 'p-button-outlined p-button-danger' : 'p-button-outlined'}`} 
+          onClick={handleLikeClick} 
+        />
+        <span className="text-sm">
+          Likes: {murmur.likeCount !== undefined ? murmur.likeCount : 0}
+        </span>
+        <Link to={`/murmurs/${murmur.id}`} className="no-underline hover:underline text-sm text-primary">
+          View Details
+        </Link>
+      </div>
+    </div>
+  );
+
+  return (
+    <Card header={header} footer={footer} className="mb-3 shadow-md">
+      <p className="m-0 p-3">{murmur.text}</p>
+    </Card>
   );
 };
 

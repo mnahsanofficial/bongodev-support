@@ -1,18 +1,42 @@
-CREATE TABLE test (
-  id int NOT NULL AUTO_INCREMENT primary key,
-  name varchar(30),
-  description varchar(255)
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO test (id, name, description) VALUES (1, 'test1', 'This is test data 1');
-INSERT INTO test (id, name, description) VALUES (2, 'test2', 'This is test data 2');
-INSERT INTO test (id, name, description) VALUES (3, 'test3', 'This is test data 3');
-INSERT INTO test (id, name, description) VALUES (4, 'test4', 'This is test data 4');
-INSERT INTO test (id, name, description) VALUES (5, 'test5', 'This is test data 5');
-INSERT INTO test (id, name, description) VALUES (6, 'test6', 'This is test data 6');
-INSERT INTO test (id, name, description) VALUES (7, 'test7', 'This is test data 7');
-INSERT INTO test (id, name, description) VALUES (8, 'test8', 'This is test data 8');
-INSERT INTO test (id, name, description) VALUES (9, 'test9', 'This is test data 9');
-INSERT INTO test (id, name, description) VALUES (10, 'test10', 'This is test data 10');
+-- Murmurs Table
+CREATE TABLE IF NOT EXISTS murmurs (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  text TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
-/* ALTER USER 'docker'@'localhost' IDENTIFIED WITH mysql_native_password BY 'docker' */
+-- Follows Table
+CREATE TABLE IF NOT EXISTS follows (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  follower_id INT NOT NULL,
+  following_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_follow (follower_id, following_id)
+);
+
+-- Likes Table
+CREATE TABLE IF NOT EXISTS likes (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  murmur_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (murmur_id) REFERENCES murmurs(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_like (user_id, murmur_id)
+);
+

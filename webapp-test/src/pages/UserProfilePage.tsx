@@ -9,6 +9,7 @@ import {
   likeMurmur,
   unlikeMurmur,
   deleteMurmur,
+  getIsFollowing, // Import the new function
 } from '../services/api';
 import MurmurList from '../components/MurmurList';
 import { Murmur } from '../components/MurmurCard';
@@ -45,15 +46,15 @@ const UserProfilePage: React.FC = () => {
   const [isLoadingMurmurs, setIsLoadingMurmurs] = useState(true);
   const [errorProfile, setErrorProfile] = useState<string | null>(null);
   const [errorMurmurs, setErrorMurmurs] = useState<string | null>(null);
-  
+
   const [isFollowingLoading, setIsFollowingLoading] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false); // TODO: This should be fetched from an API
-  
+  const [isFollowing, setIsFollowing] = useState(false);
+
   const [murmursFirst, setMurmursFirst] = useState(0);
   const [murmursCurrentPage, setMurmursCurrentPage] = useState(1);
   const [totalMurmurs, setTotalMurmurs] = useState(0);
   
-  const [likedMurmurs, setLikedMurmurs] = useState<Set<number>>(new Set());
+  // const [likedMurmurs, setLikedMurmurs] = useState<Set<number>>(new Set()); // Removed
 
   const targetUserId = routeUserId ? parseInt(routeUserId, 10) : loggedInUser?.id;
   const isOwnProfile = loggedInUser?.id === targetUserId;
@@ -64,10 +65,19 @@ const UserProfilePage: React.FC = () => {
     try {
       const response = await getUserById(id);
       setProfileUser(response.data);
-      // TODO: Fetch actual follow status if user is logged in and it's not their own profile
-      // For example, by having an endpoint like /api/users/:userId/is-following
-      // This is a placeholder:
-      setIsFollowing(false); 
+      // If logged in and not own profile, fetch follow status
+      if (loggedInUser && loggedInUser.id !== id) {
+        try {
+          const followStatusResponse = await getIsFollowing(id);
+          setIsFollowing(followStatusResponse.data.isFollowing);
+        } catch (followErr) {
+          console.error("Failed to fetch follow status:", followErr);
+          // Decide how to handle this error, maybe a state for follow status error
+          setIsFollowing(false); // Default to not following on error
+        }
+      } else {
+        setIsFollowing(false); // Not applicable for own profile or if not logged in
+      }
     } catch (err: any) {
       setErrorProfile(err.response?.data?.message || 'Failed to fetch user profile.');
       setProfileUser(null);
@@ -112,46 +122,68 @@ const UserProfilePage: React.FC = () => {
 
     try {
       await action(targetUserId);
-      setIsFollowing(newFollowStatus);
-      // Optimistically update counts, or refetch profile for accuracy
-      setProfileUser(prev => prev ? {
-        ...prev,
-        followedCount: prev.followedCount + (newFollowStatus ? 1 : -1)
-      } : null);
-       // Update logged-in user's followingCount (this would ideally be in global state/AuthContext)
-      if (auth.user) {
-         // This is a local simulation; AuthContext should ideally handle this update
-        const updatedLoggedInUser = {
-            ...auth.user,
-            followCount: (auth.user.followCount || 0) + (newFollowStatus ? 1 : -1)
-        };
-        // auth.updateUser(updatedLoggedInUser); // Assuming AuthContext has an updateUser method
-      }
+      setIsFollowing(newFollowStatus); // Keep optimistic update for responsiveness
       toast.current?.show({severity: 'success', summary: 'Success', detail: `Successfully ${newFollowStatus ? 'followed' : 'unfollowed'} user.`, life: 3000});
+      
+      // Refetch profile data to get updated follow counts from the server
+      // This also ensures the followedCount for the profile user and followCount for the loggedInUser (if applicable) are accurate.
+      fetchProfileData(targetUserId); 
+
+      // If the logged-in user's profile is being viewed by someone else,
+      // and this logged-in user is the one performing the follow/unfollow action on another profile,
+      // their own followCount might need an update if their profile is re-visited.
+      // This is better handled by a global state update or refetching their own data when their profile is viewed.
+      // For now, focusing on the accuracy of the current profile page.
+      if (loggedInUser && loggedInUser.id !== targetUserId) {
+        // Potentially refetch loggedInUser's data if it's stored/managed globally
+        // e.g., auth.refreshProfile(); 
+        // For now, we rely on the server to correctly update counts, and refetching the *viewed* profile.
+      }
+
     } catch (err: any) {
       console.error(`Failed to ${newFollowStatus ? 'follow' : 'unfollow'} user:`, err);
       toast.current?.show({severity: 'error', summary: 'Error', detail: err.response?.data?.message || `Failed to ${newFollowStatus ? 'follow' : 'unfollow'} user.`, life: 3000});
-      // Revert optimistic update if necessary, though ideally API gives source of truth
+      // Revert UI changes if API call fails
+      setIsFollowing(!newFollowStatus); 
+      // Optionally, could refetch profile data here as well to ensure consistency after an error
+      fetchProfileData(targetUserId);
     } finally {
       setIsFollowingLoading(false);
     }
   };
   
   const handleLikeMurmurOnProfile = async (murmurId: number) => {
-    // ... (optimistic update logic remains the same)
-    const currentIsLiked = likedMurmurs.has(murmurId);
-    const originalMurmurs = [...murmurs];
-    const originalLikedMurmurs = new Set(likedMurmurs);
+    const originalMurmurs = murmurs.map(m => ({ ...m })); // Deep copy for potential revert
+    let murmurToUpdate = murmurs.find(m => m.id === murmurId);
 
-    setLikedMurmurs(prev => { const newSet = new Set(prev); if (currentIsLiked) newSet.delete(murmurId); else newSet.add(murmurId); return newSet; });
-    setMurmurs(prevMurmurs => prevMurmurs.map(m => m.id === murmurId ? { ...m, likeCount: (m.likeCount || 0) + (currentIsLiked ? -1 : 1) } : m));
+    if (!murmurToUpdate) return;
+
+    const currentIsLiked = murmurToUpdate.isLiked;
+    const newIsLiked = !currentIsLiked;
+    const newLikeCount = (murmurToUpdate.likeCount || 0) + (newIsLiked ? 1 : -1);
+
+    // Optimistic UI update
+    setMurmurs(prevMurmurs =>
+      prevMurmurs.map(m =>
+        m.id === murmurId
+          ? { ...m, isLiked: newIsLiked, likeCount: newLikeCount }
+          : m
+      )
+    );
 
     try {
-      if (currentIsLiked) await unlikeMurmur(murmurId); else await likeMurmur(murmurId);
+      if (currentIsLiked) {
+        await unlikeMurmur(murmurId);
+      } else {
+        await likeMurmur(murmurId);
+      }
+      // Optional: refetch murmurs for this user to ensure data consistency,
+      // or trust the optimistic update if the API call is successful.
+      // fetchMurmurs(targetUserId, murmursCurrentPage); 
     } catch (err) {
       console.error('Failed to like/unlike murmur:', err);
+      // Revert optimistic update on error
       setMurmurs(originalMurmurs);
-      setLikedMurmurs(originalLikedMurmurs);
       toast.current?.show({severity: 'error', summary: 'Error', detail: 'Failed to update like status.', life: 3000});
     }
   };
@@ -235,9 +267,9 @@ const UserProfilePage: React.FC = () => {
           <MurmurList
             murmurs={murmurs}
             onLikeMurmur={handleLikeMurmurOnProfile}
-            likedMurmurs={likedMurmurs}
+            // likedMurmurs={likedMurmurs} // Removed, isLiked comes from murmur object
             onDelete={isOwnProfile ? confirmDeleteMurmur : undefined}
-            showDeleteButton={isOwnProfile}
+            loggedInUserId={loggedInUser?.id} // For delete button logic in MurmurList
           />
           {totalMurmurs > ITEMS_PER_PAGE && (
             <Paginator

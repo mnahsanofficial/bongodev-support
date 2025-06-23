@@ -32,8 +32,8 @@ let MurmurService = class MurmurService {
         });
         return this.murmurRepository.save(murmur);
     }
-    async getMurmurs(page = 1, limit = 10) {
-        const [murmurs, total] = await this.murmurRepository
+    async getMurmurs(page = 1, limit = 10, loggedInUserId) {
+        const [murmursData, total] = await this.murmurRepository
             .createQueryBuilder('murmur')
             .leftJoinAndSelect('murmur.user', 'user')
             .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
@@ -41,9 +41,19 @@ let MurmurService = class MurmurService {
             .skip((page - 1) * limit)
             .take(limit)
             .getManyAndCount();
-        return { murmurs, total };
+        if (loggedInUserId) {
+            const murmursWithIsLiked = await Promise.all(murmursData.map(async (murmur) => {
+                const like = await this.likeRepository.findOneBy({
+                    murmurId: murmur.id,
+                    userId: loggedInUserId,
+                });
+                return { ...murmur, isLiked: !!like };
+            }));
+            return { murmurs: murmursWithIsLiked, total };
+        }
+        return { murmurs: murmursData, total };
     }
-    async getMurmurById(id) {
+    async getMurmurById(id, loggedInUserId) {
         const murmur = await this.murmurRepository
             .createQueryBuilder('murmur')
             .where('murmur.id = :id', { id })
@@ -52,6 +62,13 @@ let MurmurService = class MurmurService {
             .getOne();
         if (!murmur) {
             throw new common_1.NotFoundException(`Murmur with ID ${id} not found`);
+        }
+        if (loggedInUserId) {
+            const like = await this.likeRepository.findOneBy({
+                murmurId: murmur.id,
+                userId: loggedInUserId,
+            });
+            return { ...murmur, isLiked: !!like };
         }
         return murmur;
     }
@@ -99,16 +116,52 @@ let MurmurService = class MurmurService {
             return { murmurs: [], total: 0 };
         }
         const followingIds = follows.map((follow) => follow.following_id);
-        const [murmurs, total] = await this.murmurRepository
+        const allUserIdsForTimeline = [...new Set([...followingIds, userId])];
+        const [murmursData, total] = await this.murmurRepository
             .createQueryBuilder('murmur')
-            .where('murmur.userId IN (:...followingIds)', { followingIds })
+            .where('murmur.userId IN (:...allUserIdsForTimeline)', { allUserIdsForTimeline })
             .leftJoinAndSelect('murmur.user', 'user')
             .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
             .orderBy('murmur.createdAt', 'DESC')
             .skip((page - 1) * limit)
             .take(limit)
             .getManyAndCount();
-        return { murmurs, total };
+        const murmursWithIsLiked = await Promise.all(murmursData.map(async (murmur) => {
+            const like = await this.likeRepository.findOneBy({
+                murmurId: murmur.id,
+                userId: userId,
+            });
+            return { ...murmur, isLiked: !!like };
+        }));
+        return { murmurs: murmursWithIsLiked, total };
+    }
+    async getMurmursByUserIdWithLikes(targetUserId, page = 1, limit = 10, loggedInUserId) {
+        const [murmursData, total] = await this.murmurRepository
+            .createQueryBuilder('murmur')
+            .where('murmur.userId = :targetUserId', { targetUserId })
+            .leftJoinAndSelect('murmur.user', 'user')
+            .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
+            .orderBy('murmur.createdAt', 'DESC')
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getManyAndCount();
+        if (loggedInUserId) {
+            const murmursWithIsLiked = await Promise.all(murmursData.map(async (murmur) => {
+                try {
+                    const like = await this.likeRepository.findOneBy({
+                        murmurId: murmur.id,
+                        userId: loggedInUserId,
+                    });
+                    return { ...murmur, isLiked: !!like };
+                }
+                catch (error) {
+                    console.error(`Error checking like status for murmur ${murmur.id} and user ${loggedInUserId}:`, error);
+                    return { ...murmur, isLiked: false };
+                }
+            }));
+            return { murmurs: murmursWithIsLiked, total };
+        }
+        return { murmurs: murmursData.map(m => ({ ...m, isLiked: false })), total };
     }
 };
 exports.MurmurService = MurmurService;

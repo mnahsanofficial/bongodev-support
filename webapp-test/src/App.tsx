@@ -5,9 +5,10 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TimelinePage from './pages/TimelinePage';
 import MurmurDetailPage from './pages/MurmurDetailPage';
-import UserProfilePage from './pages/UserProfilePage'; // Import UserProfilePage
+import UserProfilePage from './pages/UserProfilePage'; 
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
+import NotFoundPage from './pages/NotFoundPage';
 
 const AppContent: React.FC = () => {
   const { isLoading } = useAuth(); // Corrected line
@@ -26,10 +27,10 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<ProtectedRoute />}>
             <Route index element={<TimelinePage />} />
             <Route path="murmurs/:id" element={<MurmurDetailPage />} />
-            <Route path="profile" element={<UserProfilePage />} /> {/* Route for own profile */}
-            <Route path="users/:userId" element={<UserProfilePage />} /> {/* Route for other users' profiles */}
+            <Route path="profile" element={<UserProfilePage />} /> 
+            <Route path="users/:userId" element={<UserProfilePage />} /> 
           </Route>
-          
+          <Route path="*" element={<NotFoundPage />} /> {/* Catch-all route for 404 */}
         </Routes>
       </div>
     </>

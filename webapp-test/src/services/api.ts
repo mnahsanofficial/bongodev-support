@@ -75,5 +75,8 @@ export const unfollowUser = async (userId: number) => {
 export const deleteMurmur = async (murmurId: number) => {
   return apiClient.delete(`/api/me/murmurs/${murmurId}`);
 };
+export const getIsFollowing = async (userId: number) => {
+  return apiClient.get<{ isFollowing: boolean }>(`/api/users/${userId}/is-following`);
+};
 
 export default apiClient;

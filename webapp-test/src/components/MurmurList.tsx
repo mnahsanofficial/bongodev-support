@@ -4,33 +4,25 @@ import MurmurCard, { Murmur } from './MurmurCard'; // Import Murmur type
 interface MurmurListProps {
   murmurs: Murmur[];
   onLikeMurmur: (murmurId: number) => void;
-  isLoading: boolean;
-  error?: string | object | null; // Allow for object type errors if needed
-  // Add isLikedMap or similar prop if like status is managed here
-  // For now, isLiked is passed down from a parent that would manage this
-  likedMurmurs?: Set<number>; // A set of IDs of murmurs liked by the current user
+  // isLoading: boolean; // Removed
+  // error?: string | object | null; // Removed
+  // likedMurmurs?: Set<number>; // Removed - isLiked now comes directly from murmur object
+  onDelete?: (murmurId: number) => void; 
+  loggedInUserId?: number | null; 
 }
 
 const MurmurList: React.FC<MurmurListProps> = ({
   murmurs,
   onLikeMurmur,
-  isLoading,
-  error,
-  likedMurmurs = new Set(), // Default to an empty set
+  // likedMurmurs = new Set(), // Removed
+  onDelete,
+  loggedInUserId,
 }) => {
-  if (isLoading) {
-    return <p>Loading murmurs...</p>;
-  }
-
-  if (error) {
-    // Basic error display, can be enhanced
-    const errorMessage = typeof error === 'string' ? error : 'An unknown error occurred.';
-    return <p style={{ color: 'red' }}>Error loading murmurs: {errorMessage}</p>;
-  }
-
-  if (murmurs.length === 0) {
-    return <p>No murmurs found.</p>;
-  }
+  // Parent components (TimelinePage, UserProfilePage) are responsible for:
+  // 1. Displaying a loading indicator while murmurs are being fetched.
+  // 2. Displaying an error message if the fetch fails.
+  // 3. Displaying a "no murmurs" message if the array is empty after a successful fetch.
+  // MurmurList is now only responsible for rendering the list of MurmurCard components.
 
   return (
     <div>
@@ -39,7 +31,9 @@ const MurmurList: React.FC<MurmurListProps> = ({
           key={murmur.id}
           murmur={murmur}
           onLike={onLikeMurmur}
-          isLiked={likedMurmurs.has(murmur.id)} // Determine if this murmur is liked
+          isLiked={murmur.isLiked} // Use isLiked from the murmur object itself
+          onDelete={onDelete} 
+          showDeleteButton={loggedInUserId === murmur.userId && !!onDelete}
         />
       ))}
     </div>

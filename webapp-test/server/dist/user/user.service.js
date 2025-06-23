@@ -82,6 +82,16 @@ let UserService = class UserService {
         await this.userRepository.decrement({ id: followingId }, 'followCount', 1);
         await this.userRepository.decrement({ id: followerId }, 'followedCount', 1);
     }
+    async isFollowing(followerId, followingId) {
+        if (followerId === followingId) {
+            return { isFollowing: false };
+        }
+        const follow = await this.followRepository.findOneBy({
+            follower_id: followerId,
+            following_id: followingId,
+        });
+        return { isFollowing: !!follow };
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

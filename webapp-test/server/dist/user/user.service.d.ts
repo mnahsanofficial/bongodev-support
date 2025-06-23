@@ -14,4 +14,7 @@ export declare class UserService {
     }>;
     followUser(followerId: number, followingId: number): Promise<Follow>;
     unfollowUser(followerId: number, followingId: number): Promise<void>;
+    isFollowing(followerId: number, followingId: number): Promise<{
+        isFollowing: boolean;
+    }>;
 }

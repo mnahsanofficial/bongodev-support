@@ -9,17 +9,21 @@ export declare class MurmurService {
     private readonly followRepository;
     constructor(murmurRepository: Repository<Murmur>, likeRepository: Repository<Like>, followRepository: Repository<Follow>);
     createMurmur(createMurmurDto: CreateMurmurDto, userId: number): Promise<Murmur>;
-    getMurmurs(page?: number, limit?: number): Promise<{
-        murmurs: Murmur[];
+    getMurmurs(page?: number, limit?: number, loggedInUserId?: number | null): Promise<{
+        murmurs: any[];
         total: number;
     }>;
-    getMurmurById(id: number): Promise<Murmur | null>;
+    getMurmurById(id: number, loggedInUserId?: number | null): Promise<any | null>;
     deleteMurmur(id: number, userId: number): Promise<void>;
     likeMurmur(userId: number, murmurId: number): Promise<Like>;
     unlikeMurmur(userId: number, murmurId: number): Promise<void>;
     getLikesCountForMurmur(murmurId: number): Promise<number>;
     getTimeline(userId: number, page?: number, limit?: number): Promise<{
-        murmurs: Murmur[];
+        murmurs: any[];
+        total: number;
+    }>;
+    getMurmursByUserIdWithLikes(targetUserId: number, page?: number, limit?: number, loggedInUserId?: number | null): Promise<{
+        murmurs: any[];
         total: number;
     }>;
 }

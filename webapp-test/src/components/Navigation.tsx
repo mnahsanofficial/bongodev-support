@@ -9,28 +9,28 @@ const Navigation: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const items: MenuItem[] = [
+  const baseItems: MenuItem[] = [
     {
       label: 'MurmurApp',
       icon: 'pi pi-home',
       command: () => navigate('/'),
     },
-  ];
-
-  if (isAuthenticated) {
-    items.push({
+    {
       label: 'Timeline',
       icon: 'pi pi-list',
       command: () => navigate('/'),
-    });
-    if (user) {
-      items.push({
-        label: `My Profile (${user.name})`,
-        icon: 'pi pi-user',
-        command: () => navigate('/profile'),
-      });
-    }
-  }
+      visible: isAuthenticated, 
+    },
+  ];
+
+  const profileItem: MenuItem | null = isAuthenticated && user ? {
+    label: `My Profile (${user.name})`,
+    icon: 'pi pi-user',
+    command: () => navigate('/profile'),
+    visible: true,
+  } : null;
+
+  const items: MenuItem[] = profileItem ? [...baseItems, profileItem] : baseItems;
 
   const end = (
     <div className="flex align-items-center gap-2">

@@ -97,4 +97,20 @@ export class UserService {
     // Decrement followedCount for the follower
     await this.userRepository.decrement({ id: followerId }, 'followedCount', 1);
   }
+
+  async isFollowing(
+    followerId: number,
+    followingId: number,
+  ): Promise<{ isFollowing: boolean }> {
+    if (followerId === followingId) {
+      // Technically, a user doesn't "follow" themselves in a way that's queryable here.
+      // Or, you could throw a BadRequestException if this scenario isn't expected.
+      return { isFollowing: false };
+    }
+    const follow = await this.followRepository.findOneBy({
+      follower_id: followerId,
+      following_id: followingId,
+    });
+    return { isFollowing: !!follow };
+  }
 }

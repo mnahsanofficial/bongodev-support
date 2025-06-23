@@ -34,34 +34,57 @@ export class MurmurService {
     return this.murmurRepository.save(murmur);
   }
 
-  async getMurmurs(
+  // For public murmurs, isLiked is only relevant if loggedInUserId is provided
+  async getMurmurs( 
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ murmurs: Murmur[]; total: number }> {
-    const [murmurs, total] = await this.murmurRepository
+    loggedInUserId?: number | null, // Optional ID of the user making the request
+  ): Promise<{ murmurs: any[]; total: number }> {
+    const [murmursData, total] = await this.murmurRepository
       .createQueryBuilder('murmur')
-      .leftJoinAndSelect('murmur.user', 'user') // Optional: join user data
+      .leftJoinAndSelect('murmur.user', 'user')
       .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
       .orderBy('murmur.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
 
-    return { murmurs, total };
+    if (loggedInUserId) {
+      const murmursWithIsLiked = await Promise.all(
+        murmursData.map(async (murmur) => {
+          const like = await this.likeRepository.findOneBy({
+            murmurId: murmur.id,
+            userId: loggedInUserId,
+          });
+          return { ...murmur, isLiked: !!like };
+        }),
+      );
+      return { murmurs: murmursWithIsLiked, total };
+    }
+
+    return { murmurs: murmursData, total }; // No isLiked property if no user is logged in
   }
 
-  async getMurmurById(id: number): Promise<Murmur | null> {
+  // For a specific murmur, isLiked is only relevant if loggedInUserId is provided
+  async getMurmurById(id: number, loggedInUserId?: number | null): Promise<any | null> {
     const murmur = await this.murmurRepository
       .createQueryBuilder('murmur')
       .where('murmur.id = :id', { id })
-      .leftJoinAndSelect('murmur.user', 'user') // Optional: join user data
+      .leftJoinAndSelect('murmur.user', 'user')
       .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
       .getOne();
 
     if (!murmur) {
       throw new NotFoundException(`Murmur with ID ${id} not found`);
     }
-    return murmur;
+    if (loggedInUserId) {
+      const like = await this.likeRepository.findOneBy({
+        murmurId: murmur.id,
+        userId: loggedInUserId,
+      });
+      return { ...murmur, isLiked: !!like };
+    }
+    return murmur; // No isLiked property if no user is logged in
   }
 
   async deleteMurmur(id: number, userId: number): Promise<void> {
@@ -106,10 +129,10 @@ export class MurmurService {
   }
 
   async getTimeline(
-    userId: number,
+    userId: number, // This is the ID of the user whose timeline is being fetched (current logged-in user)
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ murmurs: Murmur[]; total: number }> {
+  ): Promise<{ murmurs: any[]; total: number }> { // Return type changed to any[] for murmurs temporarily
     const follows = await this.followRepository.find({
       where: { follower_id: userId },
       select: ['following_id'],
@@ -120,17 +143,69 @@ export class MurmurService {
     }
 
     const followingIds = follows.map((follow) => follow.following_id);
+    // Also include the user's own murmurs in their timeline
+    const allUserIdsForTimeline = [...new Set([...followingIds, userId])];
 
-    const [murmurs, total] = await this.murmurRepository
+
+    const [murmursData, total] = await this.murmurRepository
       .createQueryBuilder('murmur')
-      .where('murmur.userId IN (:...followingIds)', { followingIds })
-      .leftJoinAndSelect('murmur.user', 'user') // Join with user to potentially get user info
-      .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes') // Calculate likeCount
+      .where('murmur.userId IN (:...allUserIdsForTimeline)', { allUserIdsForTimeline })
+      .leftJoinAndSelect('murmur.user', 'user')
+      .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
       .orderBy('murmur.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
 
-    return { murmurs, total };
+    // For each murmur, check if the current user (userId) has liked it
+    const murmursWithIsLiked = await Promise.all(
+      murmursData.map(async (murmur) => {
+        const like = await this.likeRepository.findOneBy({
+          murmurId: murmur.id,
+          userId: userId, // Check against the logged-in user
+        });
+        return { ...murmur, isLiked: !!like };
+      }),
+    );
+
+    return { murmurs: murmursWithIsLiked, total };
+  }
+
+  async getMurmursByUserIdWithLikes(
+    targetUserId: number,
+    page: number = 1,
+    limit: number = 10,
+    loggedInUserId?: number | null,
+  ): Promise<{ murmurs: any[]; total: number }> {
+    const [murmursData, total] = await this.murmurRepository
+      .createQueryBuilder('murmur')
+      .where('murmur.userId = :targetUserId', { targetUserId })
+      .leftJoinAndSelect('murmur.user', 'user')
+      .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
+      .orderBy('murmur.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    // Augment with isLiked status
+    if (loggedInUserId) {
+      const murmursWithIsLiked = await Promise.all(
+        murmursData.map(async (murmur) => {
+          try {
+            const like = await this.likeRepository.findOneBy({
+              murmurId: murmur.id,
+              userId: loggedInUserId as number, // Cast, as it's inside if (loggedInUserId)
+            });
+            return { ...murmur, isLiked: !!like };
+          } catch (error) {
+            console.error(`Error checking like status for murmur ${murmur.id} and user ${loggedInUserId}:`, error);
+            return { ...murmur, isLiked: false }; // Default to false on error for this specific murmur
+          }
+        }),
+      );
+      return { murmurs: murmursWithIsLiked, total };
+    }
+    // If no loggedInUserId, return murmurs with likeCount but without isLiked
+    return { murmurs: murmursData.map(m => ({...m, isLiked: false })), total };
   }
 }

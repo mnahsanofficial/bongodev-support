@@ -17,8 +17,9 @@ export interface Murmur {
   createdAt: string; // Assuming ISO string date
   updatedAt: string; // Assuming ISO string date
   userId: number;
-  user: MurmurUser; // Use the MurmurUser interface
-  likeCount?: number; // Optional as it might not always be present initially
+  user: MurmurUser; 
+  likeCount?: number; 
+  isLiked?: boolean; // Added from API
 }
 
 interface MurmurCardProps {

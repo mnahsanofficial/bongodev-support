@@ -30,11 +30,11 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
   };
 
   return (
-    <Card title="Post a new Murmur" className="mb-4">
-      <form onSubmit={handleSubmit}>
-        <div className="p-fluid">
-          <div className="p-field mb-3">
-            <InputTextarea
+    // Removed Card wrapper from here. The parent component (TimelinePage) will provide the Card.
+    <form onSubmit={handleSubmit}>
+      <div className="p-fluid">
+        <div className="p-field mb-3"> {/* mb-3 might be adjusted by parent or remain if PostMurmurForm is used standalone elsewhere */}
+          <InputTextarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="What's on your mind?"
@@ -50,7 +50,6 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
         )}
         <Button type="submit" label="Post Murmur" icon="pi pi-send" disabled={isLoading} className="w-full sm:w-auto" />
       </form>
-    </Card>
   );
 };
 

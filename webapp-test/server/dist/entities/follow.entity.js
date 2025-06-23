@@ -36,12 +36,12 @@ __decorate([
     __metadata("design:type", Date)
 ], Follow.prototype, "updated_at", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.followers),
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.following),
     (0, typeorm_1.JoinColumn)({ name: 'follower_id' }),
     __metadata("design:type", user_entity_1.User)
 ], Follow.prototype, "follower", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.following),
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.followers),
     (0, typeorm_1.JoinColumn)({ name: 'following_id' }),
     __metadata("design:type", user_entity_1.User)
 ], Follow.prototype, "following", void 0);

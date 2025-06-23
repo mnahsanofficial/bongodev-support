@@ -26,11 +26,15 @@ export class Follow {
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
-  @ManyToOne(() => User, (user) => user.followers)
+   // The 'follower' user (who initiated the follow) should be linked to the 'following' list on the User entity.
+  // User.following is a list of Follow instances where this user is the 'follower'.
+  @ManyToOne(() => User, (user) => user.following)
   @JoinColumn({ name: 'follower_id' })
   follower: User;
 
-  @ManyToOne(() => User, (user) => user.following)
+  // The 'following' user (who is being followed) should be linked to the 'followers' list on the User entity.
+  // User.followers is a list of Follow instances where this user is the 'following'.
+  @ManyToOne(() => User, (user) => user.followers)
   @JoinColumn({ name: 'following_id' })
   following: User;
 }

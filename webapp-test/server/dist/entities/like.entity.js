@@ -29,7 +29,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Like.prototype, "murmurId", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' }),
     __metadata("design:type", Date)
 ], Like.prototype, "createdAt", void 0);
 __decorate([

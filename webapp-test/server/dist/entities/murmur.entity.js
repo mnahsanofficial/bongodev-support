@@ -34,11 +34,11 @@ __decorate([
     __metadata("design:type", user_entity_1.User)
 ], Murmur.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' }),
     __metadata("design:type", Date)
 ], Murmur.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)(),
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' }),
     __metadata("design:type", Date)
 ], Murmur.prototype, "updatedAt", void 0);
 __decorate([

@@ -20,11 +20,10 @@ const RegisterPage: React.FC = () => {
     event.preventDefault();
     try {
       await registerUser({ name, email, password });
-      toast.current?.show({ severity: 'success', summary: 'Registration Successful', detail: 'Logging you in...', life: 2000 });
-      // Auto-login after registration
-      const loginResponse = await loginUser({ name, password });
-      await auth.login(loginResponse.data.access_token, loginResponse.data.user);
-      setTimeout(() => navigate('/'), 1500); // Redirect after showing toast
+      // Registration successful, now redirect to login page
+      toast.current?.show({ severity: 'success', summary: 'Registration Successful', detail: 'Please log in to continue.', life: 3000 });
+      setTimeout(() => navigate('/login'), 2000); // Redirect to login page
+
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Registration failed. Please try again.';
       toast.current?.show({ severity: 'error', summary: 'Registration Failed', detail: errorMessage, life: 3000 });

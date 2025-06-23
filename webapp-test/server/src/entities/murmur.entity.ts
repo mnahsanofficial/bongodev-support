@@ -16,7 +16,7 @@ export class Murmur {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 280 })
+  @Column({ length: 5000 })
   text: string;
 
   @Column()

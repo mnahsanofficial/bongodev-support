@@ -21,7 +21,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Murmur.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 280 }),
+    (0, typeorm_1.Column)({ length: 5000 }),
     __metadata("design:type", String)
 ], Murmur.prototype, "text", void 0);
 __decorate([

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
+import DOMPurify from 'dompurify';
 
 // Define a more specific type for the murmur's user object
 interface MurmurUser {
@@ -42,7 +43,7 @@ const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDele
   };
 
   const formattedTimestamp = new Date(murmur.createdAt).toLocaleString();
-
+  const sanitizedText = DOMPurify.sanitize(murmur.text);
   const header = (
     <div className="p-card-header p-3">
       <div className="flex justify-content-between align-items-start">
@@ -92,7 +93,10 @@ const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDele
 
   return (
     <Card header={header} footer={footer} className="mb-3 shadow-md">
-      <p className="m-0 p-3">{murmur.text}</p>
+      <div
+        className="m-0 p-3"
+        dangerouslySetInnerHTML={{ __html: sanitizedText }}
+      ></div>
     </Card>
   );
 };

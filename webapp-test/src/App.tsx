@@ -19,7 +19,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <Navigation />
-      <div style={{ padding: '20px' }}> {/* Added some padding for content area */}
+      <div className="p-4"> {/* Using PrimeFlex padding */}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -29,8 +29,7 @@ const AppContent: React.FC = () => {
             <Route path="profile" element={<UserProfilePage />} /> {/* Route for own profile */}
             <Route path="users/:userId" element={<UserProfilePage />} /> {/* Route for other users' profiles */}
           </Route>
-          {/* You can add a 404 Not Found page here */}
-          {/* <Route path="*" element={<div>404 Not Found</div>} /> */}
+          
         </Routes>
       </div>
     </>

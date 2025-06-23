@@ -1,38 +1,51 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Menubar } from 'primereact/menubar';
+import { Button } from 'primereact/button';
+import { MenuItem } from 'primereact/menuitem';
 
 const Navigation: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
+  const navigate = useNavigate();
 
-  return (
-    <nav style={{ padding: '10px', borderBottom: '1px solid #ccc', marginBottom: '20px', display: 'flex', alignItems: 'center' }}>
-      <Link to="/" style={{ marginRight: '15px', textDecoration: 'none', color: 'blue' }}>
-        MurmurApp
-      </Link>
+  const items: MenuItem[] = [
+    {
+      label: 'MurmurApp',
+      icon: 'pi pi-home',
+      command: () => navigate('/'),
+    },
+  ];
 
-      {isAuthenticated && (
-        <Link to="/" style={{ marginRight: '10px' }}>Timeline</Link>
+  if (isAuthenticated) {
+    items.push({
+      label: 'Timeline',
+      icon: 'pi pi-list',
+      command: () => navigate('/'),
+    });
+    if (user) {
+      items.push({
+        label: `My Profile (${user.name})`,
+        icon: 'pi pi-user',
+        command: () => navigate('/profile'),
+      });
+    }
+  }
+
+  const end = (
+    <div className="flex align-items-center gap-2">
+      {!isAuthenticated ? (
+        <>
+          <Button label="Login" icon="pi pi-sign-in" onClick={() => navigate('/login')} className="p-button-text" />
+          <Button label="Register" icon="pi pi-user-plus" onClick={() => navigate('/register')} className="p-button-text" />
+        </>
+      ) : (
+        <Button label="Logout" icon="pi pi-sign-out" onClick={logout} className="p-button-text" />
       )}
-      
-      {isAuthenticated && user && (
-        <Link to={`/profile`} style={{ marginRight: '10px' }}> {/* Changed from /users/:id to /profile for simplicity for now */}
-          My Profile ({user.name})
-        </Link>
-      )}
-
-      <div style={{ marginLeft: 'auto' }}> {/* Pushes auth links to the right */}
-        {!isAuthenticated ? (
-          <>
-            <Link to="/login" style={{ marginRight: '10px' }}>Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        ) : (
-          <button onClick={logout}>Logout</button>
-        )}
-      </div>
-    </nav>
+    </div>
   );
+
+  return <Menubar model={items} end={end} />;
 };
 
 export default Navigation;

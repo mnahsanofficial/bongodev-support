@@ -107,19 +107,9 @@ let MurmurService = class MurmurService {
     async getLikesCountForMurmur(murmurId) {
         return this.likeRepository.count({ where: { murmurId } });
     }
-    async getTimeline(userId, page = 1, limit = 10) {
-        const follows = await this.followRepository.find({
-            where: { follower_id: userId },
-            select: ['following_id'],
-        });
-        if (follows.length === 0) {
-            return { murmurs: [], total: 0 };
-        }
-        const followingIds = follows.map((follow) => follow.following_id);
-        const allUserIdsForTimeline = [...new Set([...followingIds, userId])];
+    async getTimeline(loggedInUserId, page = 1, limit = 10) {
         const [murmursData, total] = await this.murmurRepository
             .createQueryBuilder('murmur')
-            .where('murmur.userId IN (:...allUserIdsForTimeline)', { allUserIdsForTimeline })
             .leftJoinAndSelect('murmur.user', 'user')
             .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
             .orderBy('murmur.createdAt', 'DESC')
@@ -129,7 +119,7 @@ let MurmurService = class MurmurService {
         const murmursWithIsLiked = await Promise.all(murmursData.map(async (murmur) => {
             const like = await this.likeRepository.findOneBy({
                 murmurId: murmur.id,
-                userId: userId,
+                userId: loggedInUserId,
             });
             return { ...murmur, isLiked: !!like };
         }));

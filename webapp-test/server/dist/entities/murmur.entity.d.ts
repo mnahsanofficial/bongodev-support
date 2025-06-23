@@ -1,4 +1,5 @@
 import { User } from './user.entity';
+import { Like } from './like.entity';
 export declare class Murmur {
     id: number;
     text: string;
@@ -6,4 +7,5 @@ export declare class Murmur {
     user: User;
     createdAt: Date;
     updatedAt: Date;
+    likes: Like[];
 }

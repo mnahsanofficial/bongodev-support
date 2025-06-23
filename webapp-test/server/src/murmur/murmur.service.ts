@@ -129,30 +129,17 @@ export class MurmurService {
   }
 
   async getTimeline(
-    userId: number, // This is the ID of the user whose timeline is being fetched (current logged-in user)
+    loggedInUserId: number, // ID of the user making the request, to determine 'isLiked' status
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ murmurs: any[]; total: number }> { // Return type changed to any[] for murmurs temporarily
-    const follows = await this.followRepository.find({
-      where: { follower_id: userId },
-      select: ['following_id'],
-    });
-
-    if (follows.length === 0) {
-      return { murmurs: [], total: 0 };
-    }
-
-    const followingIds = follows.map((follow) => follow.following_id);
-    // Also include the user's own murmurs in their timeline
-    const allUserIdsForTimeline = [...new Set([...followingIds, userId])];
-
-
+  ): Promise<{ murmurs: any[]; total: number }> {
+    // Fetch all murmurs for a global timeline
     const [murmursData, total] = await this.murmurRepository
       .createQueryBuilder('murmur')
-      .where('murmur.userId IN (:...allUserIdsForTimeline)', { allUserIdsForTimeline })
-      .leftJoinAndSelect('murmur.user', 'user')
-      .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes')
-      .orderBy('murmur.createdAt', 'DESC')
+      // No WHERE clause based on userId or followed users for a global timeline
+      .leftJoinAndSelect('murmur.user', 'user') // Keep user data for display
+      .loadRelationCountAndMap('murmur.likeCount', 'murmur.likes') // Keep like count
+      .orderBy('murmur.createdAt', 'DESC') // Order by newest first
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
@@ -162,7 +149,7 @@ export class MurmurService {
       murmursData.map(async (murmur) => {
         const like = await this.likeRepository.findOneBy({
           murmurId: murmur.id,
-          userId: userId, // Check against the logged-in user
+          userId: loggedInUserId, // Check against the logged-in user making the request
         });
         return { ...murmur, isLiked: !!like };
       }),

@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany, 
 } from 'typeorm';
-import { User } from './user.entity'; // Import User entity
+import { User } from './user.entity'; 
+import { Like } from './like.entity'; 
 
 @Entity()
 export class Murmur {
@@ -20,8 +22,8 @@ export class Murmur {
   @Column()
   userId: number;
 
-  @ManyToOne(() => User, { eager: false }) // eager: false is typical, joined when selected
-  @JoinColumn({ name: 'userId' }) // Specifies the foreign key column
+  @ManyToOne(() => User, { eager: false })
+  @JoinColumn({ name: 'userId' }) 
   user: User;
 
   @CreateDateColumn()
@@ -29,4 +31,7 @@ export class Murmur {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Like, like => like.murmur)
+  likes: Like[];
 }

@@ -18,7 +18,7 @@ export declare class MurmurService {
     likeMurmur(userId: number, murmurId: number): Promise<Like>;
     unlikeMurmur(userId: number, murmurId: number): Promise<void>;
     getLikesCountForMurmur(murmurId: number): Promise<number>;
-    getTimeline(userId: number, page?: number, limit?: number): Promise<{
+    getTimeline(loggedInUserId: number, page?: number, limit?: number): Promise<{
         murmurs: any[];
         total: number;
     }>;

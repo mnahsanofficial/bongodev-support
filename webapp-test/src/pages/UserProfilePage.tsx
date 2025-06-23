@@ -237,8 +237,8 @@ const UserProfilePage: React.FC = () => {
       <Card title={`${profileUser.name}'s Profile`} className="mb-4 shadow-md">
         <div className="grid">
           <div className="col-12 md:col-6">
-            <Tag className="mr-2" icon="pi pi-users" value={`Followers: ${profileUser.followedCount}`} />
-            <Tag icon="pi pi-user-plus" value={`Following: ${profileUser.followCount}`} />
+            <Tag className="mr-2" icon="pi pi-users" value={`Following: ${profileUser.followedCount}`} />
+            <Tag icon="pi pi-user-plus" value={`Followers: ${profileUser.followCount}`} />
           </div>
           {!isOwnProfile && loggedInUser && (
             <div className="col-12 md:col-6 md:text-right">

@@ -25,10 +25,10 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forRoot({
-                type: 'postgres',
+                type: 'mysql',
                 host: 'localhost',
-                port: 5432,
-                username: 'postgres',
+                port: 3306,
+                username: 'root',
                 password: 'admin',
                 database: 'murmur_app',
                 entities: [user_entity_1.User, murmur_entity_1.Murmur, like_entity_1.Like, follow_entity_1.Follow],

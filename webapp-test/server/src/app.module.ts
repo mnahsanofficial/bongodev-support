@@ -13,10 +13,10 @@ import { Follow } from './entities/follow.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: 'mysql',
       host: 'localhost',
-      port: 5432,
-      username: 'postgres',
+      port: 3306,
+      username: 'root',
       password: 'admin',
       database: 'murmur_app', 
       entities: [User, Murmur, Like,Follow], 

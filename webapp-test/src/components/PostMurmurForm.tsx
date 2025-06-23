@@ -32,7 +32,7 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
     if (plainTextLength > MAX_MURMUR_LENGTH) {
       setLocalError(`Murmur text cannot exceed ${MAX_MURMUR_LENGTH} characters (currently ${plainTextLength}).`);
     } else if (!data.replace(/<[^>]*>?/gm, '').trim()) {
-      setLocalError('Murmur text cannot be empty.');
+      setLocalError(null);
     } else {
       setLocalError(null);
     }
@@ -44,7 +44,7 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
     const currentLength = getPlainTextLength(text);
 
     if (!plainText) {
-      setLocalError('Murmur text cannot be empty.');
+      setLocalError(null);
       return;
     }
     if (currentLength > MAX_MURMUR_LENGTH) {

@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
                 required
                 autoFocus
               />
-              <label htmlFor="email">Email (used as username)</label>
+              <label htmlFor="email">Username</label>
             </span>
           </div>
           <div className="field mt-3">

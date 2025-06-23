@@ -18,7 +18,7 @@ import { Follow } from './entities/follow.entity';
       port: 5432,
       username: 'postgres',
       password: 'admin',
-      database: 'murmur_app', // Updated database name
+      database: 'murmur_app', 
       entities: [User, Murmur, Like,Follow], 
       synchronize: true,
     }),

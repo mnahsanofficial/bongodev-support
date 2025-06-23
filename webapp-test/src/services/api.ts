@@ -20,8 +20,7 @@ export const loginUser = async (credentials: any) => {
 };
 
 export const registerUser = async (userData: any) => {
-  // Corrected to /api/auth/signup as per subtask description
-  return apiClient.post('/api/auth/signup', userData);
+  return apiClient.post('/api/auth/register', userData);
 };
 
 // Example of a protected route, can be expanded later

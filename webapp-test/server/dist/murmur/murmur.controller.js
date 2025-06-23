@@ -16,6 +16,7 @@ exports.MurmurController = void 0;
 const common_1 = require("@nestjs/common");
 const create_murmur_dto_1 = require("./dto/create-murmur.dto");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const optional_jwt_auth_guard_1 = require("../auth/optional-jwt-auth.guard");
 const murmur_service_1 = require("./murmur.service");
 let MurmurController = class MurmurController {
     constructor(murmurService) {
@@ -25,11 +26,17 @@ let MurmurController = class MurmurController {
         const userId = req.user.userId;
         return this.murmurService.createMurmur(createMurmurDto, userId);
     }
-    async getMurmurs(page, limit) {
-        return this.murmurService.getMurmurs(page, limit);
+    async getMurmurs(page, limit, req) {
+        const loggedInUserId = req.user?.userId;
+        return this.murmurService.getMurmurs(page, limit, loggedInUserId);
     }
-    async getMurmurById(id) {
-        return this.murmurService.getMurmurById(id);
+    async getTimeline(req, page, limit) {
+        const userId = req.user.userId;
+        return this.murmurService.getTimeline(userId, page, limit);
+    }
+    async getMurmurById(id, req) {
+        const loggedInUserId = req.user?.userId;
+        return this.murmurService.getMurmurById(id, loggedInUserId);
     }
     async deleteMurmur(id, req) {
         const userId = req.user.userId;
@@ -55,18 +62,32 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MurmurController.prototype, "createMurmur", null);
 __decorate([
+    (0, common_1.UseGuards)(optional_jwt_auth_guard_1.OptionalJwtAuthGuard),
     (0, common_1.Get)('murmurs'),
     __param(0, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(10), common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:paramtypes", [Number, Number, Object]),
     __metadata("design:returntype", Promise)
 ], MurmurController.prototype, "getMurmurs", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('me/timeline'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(10), common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Number]),
+    __metadata("design:returntype", Promise)
+], MurmurController.prototype, "getTimeline", null);
+__decorate([
+    (0, common_1.UseGuards)(optional_jwt_auth_guard_1.OptionalJwtAuthGuard),
     (0, common_1.Get)('murmurs/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], MurmurController.prototype, "getMurmurById", null);
 __decorate([

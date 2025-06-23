@@ -22,9 +22,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
+  async validateUser(name: string, pass: string): Promise<any> { // Changed username to name
     const user = await this.userRepository.findOne({
-      where: { name: username },
+      where: { name: name }, // Changed username to name
       select: ['id', 'name', 'password', 'followCount', 'followedCount', 'createdAt', 'updatedAt'], // Need password for validation
     });
 
@@ -36,16 +36,17 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.name, sub: user.id };
+    // The user object passed to login already has 'name' as its property from validateUser
+    const payload = { name: user.name, sub: user.id }; // Changed username to name for consistency in JWT
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
   async register(registerDto: RegisterDto): Promise<Omit<User, 'password'>> {
-    const existingUser = await this.userRepository.findOneBy({ name: registerDto.username });
+    const existingUser = await this.userRepository.findOneBy({ name: registerDto.name }); // Changed to registerDto.name
     if (existingUser) {
-      throw new ConflictException('Username already exists');
+      throw new ConflictException('Name already exists');
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -54,7 +55,7 @@ export class AuthService {
     );
 
     const newUser = this.userRepository.create({
-      name: registerDto.username,
+      name: registerDto.name, // Changed to registerDto.name
       password: hashedPassword,
       // followCount and followedCount will use default values from entity
     });

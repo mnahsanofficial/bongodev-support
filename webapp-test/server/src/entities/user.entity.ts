@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Follow } from './follow.entity';
 
 @Entity()
 export class User {
@@ -24,9 +25,19 @@ export class User {
   @Column({ default: 0 })
   followedCount: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
   updatedAt: Date;
+
+  // A user can be followed by many users. This list shows who is following the current user.
+  // 'follow.following' means: in the Follow entity, the 'following' property maps to this User entity (the one being followed).
+  @OneToMany(() => Follow, (follow) => follow.following)
+  followers: Follow[];
+
+  // A user can follow many other users. This list shows who the current user is following.
+  // 'follow.follower' means: in the Follow entity, the 'follower' property maps to this User entity (the one doing the following).
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  following: Follow[];
 }

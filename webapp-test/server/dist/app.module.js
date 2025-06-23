@@ -17,6 +17,7 @@ const like_entity_1 = require("./entities/like.entity");
 const auth_module_1 = require("./auth/auth.module");
 const user_module_1 = require("./user/user.module");
 const murmur_module_1 = require("./murmur/murmur.module");
+const follow_entity_1 = require("./entities/follow.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -27,12 +28,13 @@ exports.AppModule = AppModule = __decorate([
                 type: 'mysql',
                 host: 'localhost',
                 port: 3306,
-                username: 'docker',
-                password: 'docker',
+                username: 'root',
+                password: 'admin',
                 database: 'murmur_app',
-                entities: [user_entity_1.User, murmur_entity_1.Murmur, like_entity_1.Like],
+                entities: [user_entity_1.User, murmur_entity_1.Murmur, like_entity_1.Like, follow_entity_1.Follow],
                 synchronize: true,
             }),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, murmur_entity_1.Murmur, like_entity_1.Like, follow_entity_1.Follow]),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
             murmur_module_1.MurmurModule,

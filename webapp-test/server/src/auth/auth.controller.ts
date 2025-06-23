@@ -2,6 +2,7 @@ import {
   Controller,
   Request,
   Post,
+  Get, // Added Get
   UseGuards,
   Body,
   HttpCode,
@@ -12,11 +13,14 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-
+import { UserService } from '../user/user.service'; // Added UserService
 
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService, // Injected UserService
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -34,10 +38,13 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-  // Example of a protected route to test JWT strategy
+  // Get authenticated user's profile
   @UseGuards(JwtAuthGuard)
-  @Post('profile')
-  getProfile(@Request() req) {
-    return req.user;
+  @Get('me')
+  async getProfile(@Request() req) {
+    // req.user contains payload { userId: number, email: string, ... }
+    const userId = req.user.userId;
+    // Fetch the full user details using UserService, excluding password
+    return this.userService.getUserById(userId);
   }
 }

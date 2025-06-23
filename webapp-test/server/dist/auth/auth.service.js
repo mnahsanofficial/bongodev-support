@@ -25,9 +25,9 @@ let AuthService = class AuthService {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
-    async validateUser(username, pass) {
+    async validateUser(name, pass) {
         const user = await this.userRepository.findOne({
-            where: { name: username },
+            where: { name: name },
             select: ['id', 'name', 'password', 'followCount', 'followedCount', 'createdAt', 'updatedAt'],
         });
         if (user && (await bcrypt.compare(pass, user.password))) {
@@ -37,19 +37,19 @@ let AuthService = class AuthService {
         return null;
     }
     async login(user) {
-        const payload = { username: user.name, sub: user.id };
+        const payload = { name: user.name, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
         };
     }
     async register(registerDto) {
-        const existingUser = await this.userRepository.findOneBy({ name: registerDto.username });
+        const existingUser = await this.userRepository.findOneBy({ name: registerDto.name });
         if (existingUser) {
-            throw new common_1.ConflictException('Username already exists');
+            throw new common_1.ConflictException('Name already exists');
         }
         const hashedPassword = await bcrypt.hash(registerDto.password, constants_1.bcryptConstants.saltOrRounds);
         const newUser = this.userRepository.create({
-            name: registerDto.username,
+            name: registerDto.name,
             password: hashedPassword,
         });
         const savedUser = await this.userRepository.save(newUser);

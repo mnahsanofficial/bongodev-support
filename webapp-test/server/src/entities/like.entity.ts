@@ -21,7 +21,7 @@ export class Like {
   @Column()
   murmurId: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
   createdAt: Date;
 
   @ManyToOne(() => User)

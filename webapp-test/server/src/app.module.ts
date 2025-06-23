@@ -8,6 +8,7 @@ import { Like } from './entities/like.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MurmurModule } from './murmur/murmur.module';
+import { Follow } from './entities/follow.entity';
 
 @Module({
   imports: [
@@ -15,13 +16,13 @@ import { MurmurModule } from './murmur/murmur.module';
       type: 'mysql',
       host: 'localhost',
       port: 3306,
-      username: 'docker',
-      password: 'docker',
-       database: 'murmur_app', // Updated database name
-      entities: [User, Murmur, Like], 
+      username: 'root',
+      password: 'admin',
+      database: 'murmur_app', 
+      entities: [User, Murmur, Like,Follow], 
       synchronize: true,
     }),
-    // TypeOrmModule.forFeature([User, Murmur, Like]),
+    TypeOrmModule.forFeature([User, Murmur, Like,Follow]),
     AuthModule,
     UserModule,
     MurmurModule,

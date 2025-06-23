@@ -11,14 +11,19 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("../entities/user.entity");
 const murmur_entity_1 = require("../entities/murmur.entity");
+const follow_entity_1 = require("../entities/follow.entity");
 const user_controller_1 = require("./user.controller");
 const user_service_1 = require("./user.service");
+const murmur_module_1 = require("../murmur/murmur.module");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, murmur_entity_1.Murmur])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, murmur_entity_1.Murmur, follow_entity_1.Follow]),
+            murmur_module_1.MurmurModule,
+        ],
         providers: [user_service_1.UserService],
         exports: [user_service_1.UserService],
         controllers: [user_controller_1.UserController],

@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'; // Added useRef
+import React, { useState, useEffect, useCallback, useRef } from 'react'; 
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getMurmurById, likeMurmur, unlikeMurmur, deleteMurmur } from '../services/api'; // Added deleteMurmur
+import { getMurmurById, likeMurmur, unlikeMurmur, deleteMurmur } from '../services/api'; 
 import { Murmur } from '../components/MurmurCard';
-import { useAuth } from '../contexts/AuthContext'; // Added useAuth
+import { useAuth } from '../contexts/AuthContext'; 
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Message } from 'primereact/message';
 import { Tag } from 'primereact/tag';
-import { Toast } from 'primereact/toast'; // Already added, but ensure it's here
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; // For delete confirmation
+import { Toast } from 'primereact/toast'; 
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; 
+import DOMPurify from 'dompurify';
 
 const MurmurDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -155,6 +156,7 @@ const MurmurDetailPage: React.FC = () => {
       {cardHeaderActions}
     </div>
   );
+  const sanitizedText = DOMPurify.sanitize(murmur.text);
 
 
   return (
@@ -162,7 +164,10 @@ const MurmurDetailPage: React.FC = () => {
       <Toast ref={toast} />
       <ConfirmDialog />
       <Card title={cardTitle} footer={cardFooter} className="shadow-md">
-        <p className="text-xl m-0 mb-3">{murmur.text}</p>
+        <p className="text-xl m-0 mb-3"><div
+                className="m-0 p-3"
+                dangerouslySetInnerHTML={{ __html: sanitizedText }}
+              ></div></p>
         <div className="text-sm text-gray-600">
           Posted by: {murmur.user ? (
             <Link to={`/users/${murmur.user.id}`} className="font-semibold text-primary hover:underline">

@@ -7,8 +7,10 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Follow } from './follow.entity';
+import { Comment } from './comment.entity';
+import { CommentReaction } from './comment-reaction.entity';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -40,4 +42,10 @@ export class User {
   // 'follow.follower' means: in the Follow entity, the 'follower' property maps to this User entity (the one doing the following).
   @OneToMany(() => Follow, (follow) => follow.follower)
   following: Follow[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @OneToMany(() => CommentReaction, (reaction) => reaction.user)
+  commentReactions: CommentReaction[];
 }

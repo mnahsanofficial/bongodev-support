@@ -4,53 +4,53 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import DOMPurify from 'dompurify';
 
-// Define a more specific type for the murmur's user object
-interface MurmurUser {
+// Define a more specific type for the post's user object
+interface PostUser {
   id: number;
   name: string;
   // Add other user properties if available and needed
 }
 
-// Define the type for a Murmur object
-export interface Murmur {
+// Define the type for a Post object
+export interface Post {
   id: number;
   text: string;
   createdAt: string; // Assuming ISO string date
   updatedAt: string; // Assuming ISO string date
   userId: number;
-  user: MurmurUser; 
+  user: PostUser;
   likeCount?: number; 
   isLiked?: boolean; // Added from API
 }
 
-interface MurmurCardProps {
-  murmur: Murmur;
-  onLike: (murmurId: number) => void;
+interface PostCardProps {
+  post: Post;
+  onLike: (postId: number) => void;
   isLiked?: boolean; // This will be determined at the page level
-  onDelete?: (murmurId: number) => void; // Optional delete handler
+  onDelete?: (postId: number) => void; // Optional delete handler
   showDeleteButton?: boolean; // Optional flag to show delete button
 }
 
-const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDelete, showDeleteButton }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onLike, isLiked, onDelete, showDeleteButton }) => {
   const handleLikeClick = () => {
-    onLike(murmur.id);
+    onLike(post.id);
   };
 
   const handleDeleteClick = () => {
     if (onDelete) {
-      onDelete(murmur.id);
+      onDelete(post.id);
     }
   };
 
-  const formattedTimestamp = new Date(murmur.createdAt).toLocaleString();
-  const sanitizedText = DOMPurify.sanitize(murmur.text);
+  const formattedTimestamp = new Date(post.createdAt).toLocaleString();
+  const sanitizedText = DOMPurify.sanitize(post.text);
   const header = (
     <div className="p-card-header p-3">
       <div className="flex justify-content-between align-items-start">
         <span className="font-bold">
-          {murmur.user ? (
-            <Link to={`/users/${murmur.user.id}`} className="no-underline hover:underline text-primary">
-              {murmur.user.name || 'Unknown User'}
+          {post.user ? (
+            <Link to={`/users/${post.user.id}`} className="no-underline hover:underline text-primary">
+              {post.user.name || 'Unknown User'}
             </Link>
           ) : (
             'Unknown User'
@@ -61,7 +61,7 @@ const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDele
             icon="pi pi-trash" 
             className="p-button-text p-button-danger p-button-sm" 
             onClick={handleDeleteClick} 
-            tooltip="Delete Murmur" 
+            tooltip="Delete Post"
             tooltipOptions={{ position: 'top' }}
           />
         )}
@@ -82,9 +82,9 @@ const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDele
           onClick={handleLikeClick} 
         />
         <span className="text-sm">
-          Likes: {murmur.likeCount !== undefined ? murmur.likeCount : 0}
+          Likes: {post.likeCount !== undefined ? post.likeCount : 0}
         </span>
-        <Link to={`/murmurs/${murmur.id}`} className="no-underline hover:underline text-sm text-primary">
+        <Link to={`/posts/${post.id}`} className="no-underline hover:underline text-sm text-primary">
           View Details
         </Link>
       </div>
@@ -101,4 +101,4 @@ const MurmurCard: React.FC<MurmurCardProps> = ({ murmur, onLike, isLiked, onDele
   );
 };
 
-export default MurmurCard;
+export default PostCard;

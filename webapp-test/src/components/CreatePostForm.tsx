@@ -4,14 +4,14 @@ import { Message } from 'primereact/message';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
-interface PostMurmurFormProps {
+interface CreatePostFormProps {
   onSubmit: (text: string) => Promise<void>;
   submitError?: string | null;
   isLoading?: boolean; // To disable button during submission
 }
-const MAX_MURMUR_LENGTH = 5000;
+const MAX_POST_LENGTH = 5000;
 
-const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, isLoading }) => {
+const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSubmit, submitError, isLoading }) => {
   const [text, setText] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [characterCount, setCharacterCount] = useState(0);
@@ -29,8 +29,8 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
     const plainTextLength = getPlainTextLength(data);
     setCharacterCount(plainTextLength);
 
-    if (plainTextLength > MAX_MURMUR_LENGTH) {
-      setLocalError(`Murmur text cannot exceed ${MAX_MURMUR_LENGTH} characters (currently ${plainTextLength}).`);
+    if (plainTextLength > MAX_POST_LENGTH) {
+      setLocalError(`Post text cannot exceed ${MAX_POST_LENGTH} characters (currently ${plainTextLength}).`);
     } else if (!data.replace(/<[^>]*>?/gm, '').trim()) {
       setLocalError(null);
     } else {
@@ -47,8 +47,8 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
       setLocalError(null);
       return;
     }
-    if (currentLength > MAX_MURMUR_LENGTH) {
-      setLocalError(`Murmur text cannot exceed ${MAX_MURMUR_LENGTH} characters (currently ${currentLength}).`);
+    if (currentLength > MAX_POST_LENGTH) {
+      setLocalError(`Post text cannot exceed ${MAX_POST_LENGTH} characters (currently ${currentLength}).`);
       return;
     }
     setLocalError(null); // Clear local error before submit
@@ -61,7 +61,7 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
     }
   };
   const isTextEmpty = !text.replace(/<[^>]*>?/gm, '').trim();
-  const isOverLimit = characterCount > MAX_MURMUR_LENGTH;
+  const isOverLimit = characterCount > MAX_POST_LENGTH;
   const canSubmit = !isTextEmpty && !isOverLimit && !isLoading;
 
   return (
@@ -111,16 +111,16 @@ const PostMurmurForm: React.FC<PostMurmurFormProps> = ({ onSubmit, submitError, 
             }}
           />
           <small className={`block mt-1 ${isOverLimit ? 'p-error' : 'p-text-secondary'}`}>
-            {characterCount}/{MAX_MURMUR_LENGTH} characters
+            {characterCount}/{MAX_POST_LENGTH} characters
           </small>
         </div>
       </div>
       {(localError || submitError) && (
         <Message severity="error" text={localError || submitError || 'An error occurred'} className="mb-3 w-full" />
       )}
-      <Button type="submit" label="Post Murmur" icon="pi pi-send"  disabled={!canSubmit} className="w-full sm:w-auto" />
+      <Button type="submit" label="Post" icon="pi pi-send"  disabled={!canSubmit} className="w-full sm:w-auto" />
     </form>
   );
 };
 
-export default PostMurmurForm;
+export default CreatePostForm;

@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TimelinePage from './pages/TimelinePage';
-import MurmurDetailPage from './pages/MurmurDetailPage';
+import PostDetailPage from './pages/PostDetailPage';
 import UserProfilePage from './pages/UserProfilePage'; 
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
@@ -26,7 +26,7 @@ const AppContent: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<ProtectedRoute />}>
             <Route index element={<TimelinePage />} />
-            <Route path="murmurs/:id" element={<MurmurDetailPage />} />
+            <Route path="posts/:id" element={<PostDetailPage />} />
             <Route path="profile" element={<UserProfilePage />} /> 
             <Route path="users/:userId" element={<UserProfilePage />} /> 
           </Route>

@@ -1,7 +1,7 @@
-# Web Application Test
+# BongoDev Edu-Tech Support Platform
 
 # Note
-Make sure you run this application with the following tech stack.
+This application is built with the following tech stack:
 
 - NestJS
 - React
@@ -9,80 +9,42 @@ Make sure you run this application with the following tech stack.
 
 ## Theme
 
-Please implement web application which is able to show murmur(=tweet) by user. (this application is similar to Twitter)
+This is a support system for the BongoDev Edu-Tech Platform. Users can create posts to ask questions, share information, and interact with each other through comments and reactions.
 
 ## Specifications
 
-- The user can follow other users.
-- By following, a list of murmurs posted by other users is displayed in the timeline.
-- The user can post murmur as many times as he wants.
-- Only the user who posted can delete his murmur.
-- The user can add LIKE to another person's murmur.
-- [optional] User authentication.
+- **User Authentication**: Users can register and log in to the platform.
+- **User Profiles**: Each user has a profile page showing their posts and activity.
+- **Follow System**: Users can follow other users to see their posts in a personalized timeline.
+- **Posts**: Users can create, view, and delete their own posts.
+- **Likes**: Users can like posts.
+- **Comments**: Users can comment on posts and reply to other comments.
+- **Reactions**: Users can add reactions (e.g., 👍, ❤️) to comments.
 
 ### DB
 
-There are two sample tables in this application.
-Please consider and add columns to below tables.
-Further more I think you need more tables, so it's possible to add new tables depending on below specification.
-
-e.g.
-
-- murmurs
-- users
+The database schema includes tables for `users`, `posts`, `likes`, `follows`, `comments`, and `comment_reactions`.
 
 ### Server
 
-Please implement REST API. There are three sample endpoints below.
-I think you need more endpoints, so you add more endpoints as needed.
-
-e.g.
-* `[GET] /api/murmurs/`
-* `[POST] /api/me/murmurs/`
-* `[DELETE] /api/me/murmurs/:id/`
+The backend is a REST API built with NestJS. Key endpoints include:
+*   `[GET] /api/posts/`
+*   `[POST] /api/me/posts/`
+*   `[DELETE] /api/me/posts/:id/`
+*   `[POST] /api/posts/:id/like`
+*   `[POST] /api/comments`
+*   `[GET] /api/comments/post/:postId`
+*   `[POST] /api/comments/:commentId/reactions`
+*   `[DELETE] /api/comments/:commentId/reactions`
 
 ### Client
 
-Please implement below function using React.
-If you want to add new function after complete to implement below function, it's possible to add and we evaluate your original function.
+The frontend is a single-page application built with React. Key features include:
 
-- Timeline
-  - List of Murmur information (e.g. text, LIKE count)
-  - LIKE button each murmur.
-  - Show 10 murmur per page. (need to implement pagination)
-- Murmur Detail
-  - Murmur Information (e.g. text, LIKE count)
-- Own User Detail 
-  - User information (e.g. name, followCount, followedCount)
-  - List of own murmurs
-  - Button for delete a murmur
-- Other User Detail
-  - User information (e.g. name, followCount, followedCount)
-  - List of the user's murmurs
-
-### Point
-
-- You can proceed with the implementation freely.
-- Of course, you can also search the Web or refer to the books you have.
-- The deadline is 5 days after the assignment is handed over. The date and time will be announced separately.
-- Please aim to implement all the features in client and backend. CSS is not evaluated, so the minimum design style is fine.
-- You can ask any questions about the content. If any question, please send email to (keita.ojima@venturas-bd.com) (salvana.ahmed@venturas-bd.com) , (uedayoriko@venturas-bd.com). 
-(sohana.shomi@venturas-bd.com). (rahat.redwanul@venturas-bd.com). Please note that I do not guarantee an immediate reply.
-
-## How to proceed with development
-
-1. Download `webapp_test.zip` from email. 
-2. Create repository for your private GitHub account and push unzipped files to main branch.
-3. Give the administrator privileges of the repository to the following Github id.
-   - ojimac
-4. Create `develop` branch from main.
-5. Create the feature branch for your develop branch, submit a pull request as appropriate, and merge it into your develop branch.
-6. When development is complete, create a Pull request from develop branch to main branch.
-  In the pull request overview, include the following:
-   - Appeal Points
-   - Implemented Features
-   - Unimplemented Features
-   - Impressions
+- **Timeline**: A feed of posts from followed users.
+- **Post Detail**: A page showing a single post with its comments and replies.
+- **User Profile**: A page showing a user's profile information and their posts.
+- **Interactive UI**: Users can like posts, comment on posts, and react to comments with an interactive and responsive UI.
 
 ## How to start the development environment
 ### Programming Language
@@ -98,22 +60,20 @@ If you want to add new function after complete to implement below function, it's
 ### install modules
 
 It is assumed that node(v20.x.x), npm and yarn are installed.
-The ability to build a development environment is also the subject of this test, so even if an error occurs, please resolve it on your own.
 
 ### setup project
 #### DB
-1. cd db && docker compose build
-1. docker compose up -d
+1. `cd db && docker compose build`
+2. `docker compose up -d`
 
 #### Server
-1. cd server && npm install
-1. npm run start:dev
+1. `cd server && npm install`
+2. `npm run start:dev`
 
 #### Client
-1. cd src && yarn install
-1. yarn dev
-
+1. `cd src && yarn install`
+2. `yarn dev`
 
 ### How to confirm to success to build environment
-1. You access to http://localhost:3000/
-1. It's success if render html.
+1. Access http://localhost:3000/
+2. You should see the application running.

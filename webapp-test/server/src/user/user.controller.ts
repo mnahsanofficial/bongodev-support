@@ -10,18 +10,18 @@ import {
   HttpCode,
   UseGuards,
   Req,
-  Optional, // To allow req.user to be undefined if endpoint is public but can use auth info
+  Optional,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { MurmurService } from '../murmur/murmur.service'; // Import MurmurService
+import { PostService } from '../post/post.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard'; // We'll create this
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 
 @Controller('api/users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly murmurService: MurmurService, // Inject MurmurService
+    private readonly postService: PostService,
   ) {}
 
   @Get(':id')
@@ -29,17 +29,16 @@ export class UserController {
     return this.userService.getUserById(id);
   }
 
-  @UseGuards(OptionalJwtAuthGuard) // Use the new optional guard
-  @Get(':id/murmurs')
-  async getMurmursByUserId(
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(':id/posts')
+  async getPostsByUserId(
     @Param('id', ParseIntPipe) targetUserId: number,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Req() req,
   ) {
     const loggedInUserId = req.user?.userId;
-    // Call a method in MurmurService that handles fetching murmurs with 'isLiked' status
-    return this.murmurService.getMurmursByUserIdWithLikes(targetUserId, page, limit, loggedInUserId);
+    return this.postService.getPostsByUserIdWithLikes(targetUserId, page, limit, loggedInUserId);
   }
 
   @UseGuards(JwtAuthGuard)

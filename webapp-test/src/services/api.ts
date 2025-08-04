@@ -28,16 +28,16 @@ export const getMyProfile = async () => {
   return apiClient.get('/api/auth/me');
 };
 
-export const postMurmur = async (text: string) => {
-  return apiClient.post('/api/me/murmurs', { text });
+export const createPost = async (text: string) => {
+  return apiClient.post('/api/me/posts', { text });
 };
 
-export const likeMurmur = async (murmurId: number) => {
-  return apiClient.post(`/api/murmurs/${murmurId}/like`);
+export const likePost = async (postId: number) => {
+  return apiClient.post(`/api/posts/${postId}/like`);
 };
 
-export const unlikeMurmur = async (murmurId: number) => {
-  return apiClient.delete(`/api/murmurs/${murmurId}/like`);
+export const unlikePost = async (postId: number) => {
+  return apiClient.delete(`/api/posts/${postId}/like`);
 };
 
 // Function to get user's own timeline
@@ -45,22 +45,24 @@ export const getMyTimeline = async (page: number = 1, limit: number = 10) => {
   return apiClient.get('/api/me/timeline', { params: { page, limit } });
 };
 
-// Function to get all murmurs (public feed)
-export const getAllMurmurs = async (page: number = 1, limit: number = 10) => {
-  return apiClient.get('/api/murmurs', { params: { page, limit } });
+// Function to get all posts (public feed)
+export const getAllPosts = async (page: number = 1, limit: number = 10) => {
+  return apiClient.get('/api/posts', { params: { page, limit } });
 };
 
-export const getMurmurById = async (id: number) => {
-  return apiClient.get(`/api/murmurs/${id}`);
+export const getPostById = async (id: number, loggedInUserId?: number) => {
+  const config = loggedInUserI d ? { headers: { 'user-id': loggedInUserId } } : {};
+  return apiClient.get(`/api/posts/${id}`, config);
 };
+
 
 // User profile related APIs
 export const getUserById = async (userId: number) => {
   return apiClient.get(`/api/users/${userId}`);
 };
 
-export const getMurmursByUserId = async (userId: number, page: number = 1, limit: number = 10) => {
-  return apiClient.get(`/api/users/${userId}/murmurs`, { params: { page, limit } });
+export const getPostsByUserId = async (userId: number, page: number = 1, limit: number = 10) => {
+  return apiClient.get(`/api/users/${userId}/posts`, { params: { page, limit } });
 };
 
 export const followUser = async (userId: number) => {
@@ -71,12 +73,29 @@ export const unfollowUser = async (userId: number) => {
   return apiClient.delete(`/api/users/${userId}/follow`);
 };
 
-// Murmur deletion API - note the path from the subtask description
-export const deleteMurmur = async (murmurId: number) => {
-  return apiClient.delete(`/api/me/murmurs/${murmurId}`);
+// Post deletion API
+export const deletePost = async (postId: number) => {
+  return apiClient.delete(`/api/me/posts/${postId}`);
 };
 export const getIsFollowing = async (userId: number) => {
   return apiClient.get<{ isFollowing: boolean }>(`/api/users/${userId}/is-following`);
+};
+
+// Comment APIs
+export const createComment = async (commentData: { text: string; postId: number; parentId?: number }) => {
+  return apiClient.post('/api/comments', commentData);
+};
+
+export const getCommentsByPostId = async (postId: number) => {
+  return apiClient.get(`/api/comments/post/${postId}`);
+};
+
+export const addCommentReaction = async (commentId: number, reactionType: string) => {
+  return apiClient.post(`/api/comments/${commentId}/reactions`, { reactionType });
+};
+
+export const removeCommentReaction = async (commentId: number, reactionType: string) => {
+  return apiClient.delete(`/api/comments/${commentId}/reactions`, { data: { reactionType } });
 };
 
 export default apiClient;

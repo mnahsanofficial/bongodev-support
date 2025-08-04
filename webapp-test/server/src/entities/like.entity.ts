@@ -7,10 +7,10 @@ import {
   Index,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Murmur } from './murmur.entity';
+import { Post } from './post.entity';
 
-@Entity()
-@Index(['userId', 'murmurId'], { unique: true })
+@Entity('likes')
+@Index(['userId', 'postId'], { unique: true })
 export class Like {
   @PrimaryGeneratedColumn()
   id: number;
@@ -19,7 +19,7 @@ export class Like {
   userId: number;
 
   @Column()
-  murmurId: number;
+  postId: number;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
   createdAt: Date;
@@ -27,6 +27,6 @@ export class Like {
   @ManyToOne(() => User)
   user: User;
 
-  @ManyToOne(() => Murmur)
-  murmur: Murmur;
+  @ManyToOne(() => Post)
+  post: Post;
 }

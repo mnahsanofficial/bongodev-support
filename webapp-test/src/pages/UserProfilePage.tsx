@@ -3,16 +3,16 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getUserById,
-  getMurmursByUserId,
+  getPostsByUserId,
   followUser,
   unfollowUser,
-  likeMurmur,
-  unlikeMurmur,
-  deleteMurmur,
-  getIsFollowing, // Import the new function
+  likePost,
+  unlikePost,
+  deletePost,
+  getIsFollowing,
 } from '../services/api';
-import MurmurList from '../components/MurmurList';
-import { Murmur } from '../components/MurmurCard';
+import PostList from '../components/PostList';
+import { Post } from '../components/PostCard';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { ProgressSpinner } from 'primereact/progressspinner';
@@ -41,21 +41,19 @@ const UserProfilePage: React.FC = () => {
   const toast = useRef<Toast>(null);
 
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
-  const [murmurs, setMurmurs] = useState<Murmur[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [isLoadingMurmurs, setIsLoadingMurmurs] = useState(true);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [errorProfile, setErrorProfile] = useState<string | null>(null);
-  const [errorMurmurs, setErrorMurmurs] = useState<string | null>(null);
+  const [errorPosts, setErrorPosts] = useState<string | null>(null);
 
   const [isFollowingLoading, setIsFollowingLoading] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const [murmursFirst, setMurmursFirst] = useState(0);
-  const [murmursCurrentPage, setMurmursCurrentPage] = useState(1);
-  const [totalMurmurs, setTotalMurmurs] = useState(0);
+  const [postsFirst, setPostsFirst] = useState(0);
+  const [postsCurrentPage, setPostsCurrentPage] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
   
-  // const [likedMurmurs, setLikedMurmurs] = useState<Set<number>>(new Set()); // Removed
-
   const targetUserId = routeUserId ? parseInt(routeUserId, 10) : loggedInUser?.id;
   const isOwnProfile = loggedInUser?.id === targetUserId;
 
@@ -65,18 +63,16 @@ const UserProfilePage: React.FC = () => {
     try {
       const response = await getUserById(id);
       setProfileUser(response.data);
-      // If logged in and not own profile, fetch follow status
       if (loggedInUser && loggedInUser.id !== id) {
         try {
           const followStatusResponse = await getIsFollowing(id);
           setIsFollowing(followStatusResponse.data.isFollowing);
         } catch (followErr) {
           console.error("Failed to fetch follow status:", followErr);
-          // Decide how to handle this error, maybe a state for follow status error
-          setIsFollowing(false); // Default to not following on error
+          setIsFollowing(false);
         }
       } else {
-        setIsFollowing(false); // Not applicable for own profile or if not logged in
+        setIsFollowing(false);
       }
     } catch (err: any) {
       setErrorProfile(err.response?.data?.message || 'Failed to fetch user profile.');
@@ -86,32 +82,32 @@ const UserProfilePage: React.FC = () => {
     }
   }, []);
 
-  const fetchMurmurs = useCallback(async (id: number, page: number) => {
-    setIsLoadingMurmurs(true);
-    setErrorMurmurs(null);
+  const fetchPosts = useCallback(async (id: number, page: number) => {
+    setIsLoadingPosts(true);
+    setErrorPosts(null);
     try {
-      const response = await getMurmursByUserId(id, page, ITEMS_PER_PAGE);
-      setMurmurs(response.data.murmurs || []);
-      setTotalMurmurs(response.data.total || 0);
+      const response = await getPostsByUserId(id, page, ITEMS_PER_PAGE);
+      setPosts(response.data.posts || []);
+      setTotalPosts(response.data.total || 0);
     } catch (err: any) {
-      setErrorMurmurs(err.response?.data?.message || 'Failed to fetch murmurs.');
-      setMurmurs([]);
-      setTotalMurmurs(0);
+      setErrorPosts(err.response?.data?.message || 'Failed to fetch posts.');
+      setPosts([]);
+      setTotalPosts(0);
     } finally {
-      setIsLoadingMurmurs(false);
+      setIsLoadingPosts(false);
     }
   }, []);
 
   useEffect(() => {
     if (targetUserId) {
       fetchProfileData(targetUserId);
-      fetchMurmurs(targetUserId, murmursCurrentPage);
+      fetchPosts(targetUserId, postsCurrentPage);
     } else if (!routeUserId && !loggedInUser) {
       setErrorProfile("User not found or not logged in.");
       setIsLoadingProfile(false);
-      setIsLoadingMurmurs(false);
+      setIsLoadingPosts(false);
     }
-  }, [targetUserId, fetchProfileData, fetchMurmurs, murmursCurrentPage, routeUserId, loggedInUser]);
+  }, [targetUserId, fetchProfileData, fetchPosts, postsCurrentPage, routeUserId, loggedInUser]);
 
   const handleFollowToggle = async () => {
     if (!targetUserId || !loggedInUser || isOwnProfile) return;
@@ -152,71 +148,65 @@ const UserProfilePage: React.FC = () => {
     }
   };
   
-  const handleLikeMurmurOnProfile = async (murmurId: number) => {
-    const originalMurmurs = murmurs.map(m => ({ ...m })); // Deep copy for potential revert
-    let murmurToUpdate = murmurs.find(m => m.id === murmurId);
+  const handleLikePostOnProfile = async (postId: number) => {
+    const originalPosts = posts.map(p => ({ ...p }));
+    let postToUpdate = posts.find(p => p.id === postId);
 
-    if (!murmurToUpdate) return;
+    if (!postToUpdate) return;
 
-    const currentIsLiked = murmurToUpdate.isLiked;
+    const currentIsLiked = postToUpdate.isLiked;
     const newIsLiked = !currentIsLiked;
-    const newLikeCount = (murmurToUpdate.likeCount || 0) + (newIsLiked ? 1 : -1);
+    const newLikeCount = (postToUpdate.likeCount || 0) + (newIsLiked ? 1 : -1);
 
-    // Optimistic UI update
-    setMurmurs(prevMurmurs =>
-      prevMurmurs.map(m =>
-        m.id === murmurId
-          ? { ...m, isLiked: newIsLiked, likeCount: newLikeCount }
-          : m
+    setPosts(prevPosts =>
+      prevPosts.map(p =>
+        p.id === postId
+          ? { ...p, isLiked: newIsLiked, likeCount: newLikeCount }
+          : p
       )
     );
 
     try {
       if (currentIsLiked) {
-        await unlikeMurmur(murmurId);
+        await unlikePost(postId);
       } else {
-        await likeMurmur(murmurId);
+        await likePost(postId);
       }
-      // Optional: refetch murmurs for this user to ensure data consistency,
-      // or trust the optimistic update if the API call is successful.
-      // fetchMurmurs(targetUserId, murmursCurrentPage); 
     } catch (err) {
-      console.error('Failed to like/unlike murmur:', err);
-      // Revert optimistic update on error
-      setMurmurs(originalMurmurs);
+      console.error('Failed to like/unlike post:', err);
+      setPosts(originalPosts);
       toast.current?.show({severity: 'error', summary: 'Error', detail: 'Failed to update like status.', life: 3000});
     }
   };
 
-  const confirmDeleteMurmur = (murmurId: number) => {
+  const confirmDeletePost = (postId: number) => {
     confirmDialog({
-      message: 'Are you sure you want to delete this murmur?',
+      message: 'Are you sure you want to delete this post?',
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptClassName: 'p-button-danger',
-      accept: () => handleDeleteMurmur(murmurId),
+      accept: () => handleDeletePost(postId),
     });
   };
 
-  const handleDeleteMurmur = async (murmurId: number) => {
+  const handleDeletePost = async (postId: number) => {
     if (!targetUserId) return;
-    const originalMurmurs = [...murmurs];
-    setMurmurs(prevMurmurs => prevMurmurs.filter(m => m.id !== murmurId)); // Optimistic delete
+    const originalPosts = [...posts];
+    setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
     try {
-      await deleteMurmur(murmurId);
-      toast.current?.show({severity: 'success', summary: 'Deleted', detail: 'Murmur deleted successfully.', life: 3000});
-      // Refetch to ensure data consistency, especially if total items change
-      fetchMurmurs(targetUserId, murmursCurrentPage); 
+      await deletePost(postId);
+      toast.current?.show({severity: 'success', summary: 'Deleted', detail: 'Post deleted successfully.', life: 3000});
+      fetchPosts(targetUserId, postsCurrentPage);
     } catch (err: any) {
-      console.error('Failed to delete murmur:', err);
-      setMurmurs(originalMurmurs); // Revert
-      toast.current?.show({severity: 'error', summary: 'Error', detail: err.response?.data?.message || 'Failed to delete murmur.', life: 3000});
+      console.error('Failed to delete post:', err);
+      setPosts(originalPosts);
+      toast.current?.show({severity: 'error', summary: 'Error', detail: err.response?.data?.message || 'Failed to delete post.', life: 3000});
     }
   };
 
-  const onMurmursPageChange = (event: PaginatorPageChangeEvent) => {
-    setMurmursFirst(event.first);
-    setMurmursCurrentPage(event.page + 1);
+  const onPostsPageChange = (event: PaginatorPageChangeEvent) => {
+    setPostsFirst(event.first);
+    setPostsCurrentPage(event.page + 1);
   };
 
   if (isLoadingProfile) {
@@ -255,33 +245,32 @@ const UserProfilePage: React.FC = () => {
       </Card>
 
       <Divider align="left" type="dashed" className="my-4">
-        <b>Murmurs by {profileUser.name}</b>
+        <b>Posts by {profileUser.name}</b>
       </Divider>
 
-      {isLoadingMurmurs && !murmurs.length ? (
+      {isLoadingPosts && !posts.length ? (
          <div className="flex justify-content-center p-4"><ProgressSpinner style={{width: '40px', height: '40px'}} /></div>
-      ) : errorMurmurs ? (
-        <Message severity="error" text={errorMurmurs} className="w-full" />
+      ) : errorPosts ? (
+        <Message severity="error" text={errorPosts} className="w-full" />
       ) : (
         <>
-          <MurmurList
-            murmurs={murmurs}
-            onLikeMurmur={handleLikeMurmurOnProfile}
-            // likedMurmurs={likedMurmurs} // Removed, isLiked comes from murmur object
-            onDelete={isOwnProfile ? confirmDeleteMurmur : undefined}
-            loggedInUserId={loggedInUser?.id} // For delete button logic in MurmurList
+          <PostList
+            posts={posts}
+            onLikePost={handleLikePostOnProfile}
+            onDelete={isOwnProfile ? confirmDeletePost : undefined}
+            loggedInUserId={loggedInUser?.id}
           />
-          {totalMurmurs > ITEMS_PER_PAGE && (
+          {totalPosts > ITEMS_PER_PAGE && (
             <Paginator
-              first={murmursFirst}
+              first={postsFirst}
               rows={ITEMS_PER_PAGE}
-              totalRecords={totalMurmurs}
-              onPageChange={onMurmursPageChange}
+              totalRecords={totalPosts}
+              onPageChange={onPostsPageChange}
               className="mt-4"
             />
           )}
-           {!isLoadingMurmurs && !errorMurmurs && murmurs.length === 0 && (
-             <Message severity="info" text={`${profileUser.name} hasn't posted any murmurs yet.`} className="mt-4"/>
+           {!isLoadingPosts && !errorPosts && posts.length === 0 && (
+             <Message severity="info" text={`${profileUser.name} hasn't posted any posts yet.`} className="mt-4"/>
           )}
         </>
       )}

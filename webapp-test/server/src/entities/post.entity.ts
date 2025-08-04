@@ -9,10 +9,11 @@ import {
   OneToMany, 
 } from 'typeorm';
 import { User } from './user.entity'; 
-import { Like } from './like.entity'; 
+import { Like } from './like.entity';
+import { Comment } from './comment.entity';
 
-@Entity()
-export class Murmur {
+@Entity('posts')
+export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -32,6 +33,9 @@ export class Murmur {
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
   updatedAt: Date;
 
-  @OneToMany(() => Like, like => like.murmur)
+  @OneToMany(() => Like, like => like.post)
   likes: Like[];
+
+  @OneToMany(() => Comment, comment => comment.post)
+  comments: Comment[];
 }

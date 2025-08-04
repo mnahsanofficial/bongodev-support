@@ -1,4 +1,4 @@
-export class CreateMurmurDto {
+export class CreatePostDto {
   text: string;
   userId: number;
 }

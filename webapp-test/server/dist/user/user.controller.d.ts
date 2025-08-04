@@ -1,12 +1,12 @@
 import { UserService } from './user.service';
-import { MurmurService } from '../murmur/murmur.service';
+import { PostService } from 'src/post/post.service';
 export declare class UserController {
     private readonly userService;
     private readonly murmurService;
-    constructor(userService: UserService, murmurService: MurmurService);
+    constructor(userService: UserService, murmurService: PostService);
     getUserById(id: number): Promise<import("../entities/user.entity").User>;
     getMurmursByUserId(targetUserId: number, page: number, limit: number, req: any): Promise<{
-        murmurs: any[];
+        posts: any[];
         total: number;
     }>;
     followUser(followingId: number, req: any): Promise<import("../entities/follow.entity").Follow>;

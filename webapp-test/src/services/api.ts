@@ -51,7 +51,7 @@ export const getAllPosts = async (page: number = 1, limit: number = 10) => {
 };
 
 export const getPostById = async (id: number, loggedInUserId?: number) => {
-  const config = loggedInUserI d ? { headers: { 'user-id': loggedInUserId } } : {};
+  const config = loggedInUserId ? { headers: { 'user-id': loggedInUserId } } : {};
   return apiClient.get(`/api/posts/${id}`, config);
 };
 

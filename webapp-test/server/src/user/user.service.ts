@@ -7,16 +7,16 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { Murmur } from '../entities/murmur.entity';
 import { Follow } from '../entities/follow.entity'; // Import Follow
+import { Post } from 'src/entities/post.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Murmur)
-    private readonly murmurRepository: Repository<Murmur>,
+    @InjectRepository(Post)
+    private readonly murmurRepository: Repository<Post>,
     @InjectRepository(Follow) // Inject FollowRepository
     private readonly followRepository: Repository<Follow>,
   ) {}
@@ -36,7 +36,7 @@ export class UserService {
     userId: number,
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ murmurs: Murmur[]; total: number }> {
+  ): Promise<{ murmurs: Post[]; total: number }> {
     const [murmurs, total] = await this.murmurRepository.findAndCount({
       where: { userId },
       skip: (page - 1) * limit,

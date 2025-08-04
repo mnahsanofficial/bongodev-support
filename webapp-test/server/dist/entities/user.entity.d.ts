@@ -1,4 +1,6 @@
 import { Follow } from './follow.entity';
+import { Comment } from './comment.entity';
+import { CommentReaction } from './comment-reaction.entity';
 export declare class User {
     id: number;
     name: string;
@@ -9,4 +11,6 @@ export declare class User {
     updatedAt: Date;
     followers: Follow[];
     following: Follow[];
+    comments: Comment[];
+    commentReactions: CommentReaction[];
 }

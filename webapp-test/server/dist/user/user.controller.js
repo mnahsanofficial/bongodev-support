@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
-const murmur_service_1 = require("../murmur/murmur.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const optional_jwt_auth_guard_1 = require("../auth/optional-jwt-auth.guard");
+const post_service_1 = require("../post/post.service");
 let UserController = class UserController {
     constructor(userService, murmurService) {
         this.userService = userService;
@@ -28,7 +28,7 @@ let UserController = class UserController {
     }
     async getMurmursByUserId(targetUserId, page, limit, req) {
         const loggedInUserId = req.user?.userId;
-        return this.murmurService.getMurmursByUserIdWithLikes(targetUserId, page, limit, loggedInUserId);
+        return this.murmurService.getPostsByUserIdWithLikes(targetUserId, page, limit, loggedInUserId);
     }
     async followUser(followingId, req) {
         const followerId = req.user.userId;
@@ -93,6 +93,6 @@ __decorate([
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('api/users'),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        murmur_service_1.MurmurService])
+        post_service_1.PostService])
 ], UserController);
 //# sourceMappingURL=user.controller.js.map

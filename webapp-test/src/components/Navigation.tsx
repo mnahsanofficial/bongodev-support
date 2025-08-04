@@ -11,7 +11,7 @@ const Navigation: React.FC = () => {
 
   const baseItems: MenuItem[] = [
     {
-      label: 'MurmurApp',
+      label: 'bongoDev Support',
       icon: 'pi pi-home',
       command: () => navigate('/'),
     },

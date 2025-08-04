@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const follow_entity_1 = require("./follow.entity");
+const comment_entity_1 = require("./comment.entity");
+const comment_reaction_entity_1 = require("./comment-reaction.entity");
 let User = class User {
 };
 exports.User = User;
@@ -51,7 +53,15 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => follow_entity_1.Follow, (follow) => follow.follower),
     __metadata("design:type", Array)
 ], User.prototype, "following", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => comment_entity_1.Comment, (comment) => comment.user),
+    __metadata("design:type", Array)
+], User.prototype, "comments", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => comment_reaction_entity_1.CommentReaction, (reaction) => reaction.user),
+    __metadata("design:type", Array)
+], User.prototype, "commentReactions", void 0);
 exports.User = User = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)('users')
 ], User);
 //# sourceMappingURL=user.entity.js.map

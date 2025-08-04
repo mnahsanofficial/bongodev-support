@@ -12,12 +12,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_entity_1 = require("./entities/user.entity");
-const murmur_entity_1 = require("./entities/murmur.entity");
+const post_entity_1 = require("./entities/post.entity");
 const like_entity_1 = require("./entities/like.entity");
 const auth_module_1 = require("./auth/auth.module");
 const user_module_1 = require("./user/user.module");
-const murmur_module_1 = require("./murmur/murmur.module");
+const post_module_1 = require("./post/post.module");
 const follow_entity_1 = require("./entities/follow.entity");
+const comment_module_1 = require("./comment/comment.module");
+const comment_entity_1 = require("./entities/comment.entity");
+const comment_reaction_entity_1 = require("./entities/comment-reaction.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,14 +33,15 @@ exports.AppModule = AppModule = __decorate([
                 port: 3306,
                 username: 'root',
                 password: 'admin',
-                database: 'murmur_app',
-                entities: [user_entity_1.User, murmur_entity_1.Murmur, like_entity_1.Like, follow_entity_1.Follow],
+                database: 'support_app',
+                entities: [user_entity_1.User, post_entity_1.Post, like_entity_1.Like, follow_entity_1.Follow, comment_entity_1.Comment, comment_reaction_entity_1.CommentReaction],
                 synchronize: true,
             }),
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, murmur_entity_1.Murmur, like_entity_1.Like, follow_entity_1.Follow]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, post_entity_1.Post, like_entity_1.Like, follow_entity_1.Follow, comment_entity_1.Comment, comment_reaction_entity_1.CommentReaction]),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
-            murmur_module_1.MurmurModule,
+            post_module_1.PostModule,
+            comment_module_1.CommentModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

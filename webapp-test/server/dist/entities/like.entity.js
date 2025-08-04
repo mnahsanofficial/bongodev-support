@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Like = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("./user.entity");
-const murmur_entity_1 = require("./murmur.entity");
+const post_entity_1 = require("./post.entity");
 let Like = class Like {
 };
 exports.Like = Like;
@@ -27,7 +27,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], Like.prototype, "murmurId", void 0);
+], Like.prototype, "postId", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' }),
     __metadata("design:type", Date)
@@ -37,11 +37,11 @@ __decorate([
     __metadata("design:type", user_entity_1.User)
 ], Like.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => murmur_entity_1.Murmur),
-    __metadata("design:type", murmur_entity_1.Murmur)
-], Like.prototype, "murmur", void 0);
+    (0, typeorm_1.ManyToOne)(() => post_entity_1.Post),
+    __metadata("design:type", post_entity_1.Post)
+], Like.prototype, "post", void 0);
 exports.Like = Like = __decorate([
-    (0, typeorm_1.Entity)(),
-    (0, typeorm_1.Index)(['userId', 'murmurId'], { unique: true })
+    (0, typeorm_1.Entity)('likes'),
+    (0, typeorm_1.Index)(['userId', 'postId'], { unique: true })
 ], Like);
 //# sourceMappingURL=like.entity.js.map

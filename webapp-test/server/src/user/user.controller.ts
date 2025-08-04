@@ -13,15 +13,15 @@ import {
   Optional, // To allow req.user to be undefined if endpoint is public but can use auth info
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { MurmurService } from '../murmur/murmur.service'; // Import MurmurService
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard'; // We'll create this
+import { PostService } from 'src/post/post.service';
 
 @Controller('api/users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly murmurService: MurmurService, // Inject MurmurService
+    private readonly murmurService: PostService, // Inject MurmurService
   ) {}
 
   @Get(':id')
@@ -39,7 +39,7 @@ export class UserController {
   ) {
     const loggedInUserId = req.user?.userId;
     // Call a method in MurmurService that handles fetching murmurs with 'isLiked' status
-    return this.murmurService.getMurmursByUserIdWithLikes(targetUserId, page, limit, loggedInUserId);
+    return this.murmurService.getPostsByUserIdWithLikes(targetUserId, page, limit, loggedInUserId);
   }
 
   @UseGuards(JwtAuthGuard)

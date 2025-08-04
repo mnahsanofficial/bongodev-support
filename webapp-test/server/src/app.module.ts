@@ -11,6 +11,7 @@ import { PostModule } from './post/post.module';
 import { Follow } from './entities/follow.entity';
 import { CommentModule } from './comment/comment.module';
 import { Comment } from './entities/comment.entity';
+import { CommentReaction } from './entities/comment-reaction.entity';
 
 @Module({
   imports: [
@@ -20,11 +21,11 @@ import { Comment } from './entities/comment.entity';
       port: 3306,
       username: 'root',
       password: 'admin',
-      database: 'post_app',
-      entities: [User, Post, Like, Follow, Comment],
+      database: 'support_app',
+      entities: [User, Post, Like, Follow, Comment,CommentReaction],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Post, Like, Follow, Comment]),
+    TypeOrmModule.forFeature([User, Post, Like, Follow, Comment,CommentReaction ]),
     AuthModule,
     UserModule,
     PostModule,

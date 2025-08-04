@@ -1,10 +1,10 @@
 import { User } from './user.entity';
-import { Murmur } from './murmur.entity';
+import { Post } from './post.entity';
 export declare class Like {
     id: number;
     userId: number;
-    murmurId: number;
+    postId: number;
     createdAt: Date;
     user: User;
-    murmur: Murmur;
+    post: Post;
 }

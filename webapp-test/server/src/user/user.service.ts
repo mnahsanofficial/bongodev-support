@@ -24,7 +24,7 @@ export class UserService {
   async getUserById(id: number): Promise<User | null> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: ['id', 'name', 'followCount', 'followedCount', 'createdAt', 'updatedAt'], // Explicitly excluding password
+      select: ['id', 'name', 'followCount', 'followedCount', 'createdAt', 'updatedAt'],
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);

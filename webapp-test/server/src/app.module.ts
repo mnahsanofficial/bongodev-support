@@ -22,7 +22,7 @@ import { CommentReaction } from './entities/comment-reaction.entity';
       username: 'root',
       password: 'admin',
       database: 'support_app',
-      entities: [User, Post, Like, Follow, Comment,CommentReaction],
+      entities: [User, Post, Like, Follow, Comment,CommentReaction, CommentReaction],
       synchronize: true,
     }),
     TypeOrmModule.forFeature([User, Post, Like, Follow, Comment,CommentReaction ]),
